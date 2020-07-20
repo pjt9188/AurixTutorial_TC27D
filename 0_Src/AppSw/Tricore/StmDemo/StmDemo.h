@@ -1,10 +1,8 @@
 /**
- * \file Cpu0_Main.c
- * \brief System initialisation and main program implementation.
- *
+ * \file StmDemo.h
+ * \brief Demo Template
  * \version iLLD_Demos_1_0_1_8_0
  * \copyright Copyright (c) 2014 Infineon Technologies AG. All rights reserved.
- *
  *
  *                                 IMPORTANT NOTICE
  *
@@ -19,73 +17,55 @@
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE.
  * INFINEON SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL,
  * OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+ *
+ * \defgroup IfxLld_Demo_StmDemo_SrcDoc_Main Demo Source
+ * \ingroup IfxLld_Demo_StmDemo_SrcDoc
+ * \defgroup IfxLld_Demo_StmDemo_SrcDoc_Main_Interrupt Interrupts
+ * \ingroup IfxLld_Demo_StmDemo_SrcDoc_Main
  */
 
+#ifndef STMDEMO_H
+#define STMDEMO_H 1
 /******************************************************************************/
 /*----------------------------------Includes----------------------------------*/
 /******************************************************************************/
-
+#include <Ifx_Types.h>
+#include <stdio.h>
+#include "Bsp.h"
+#include "ConfigurationIsr.h"
+#include "Cpu/Irq/IfxCpu_Irq.h"
+#include "IfxPort.h"
+#include <Stm/Std/IfxStm.h>
+#include <Src/Std/IfxSrc.h>
 #include "Cpu0_Main.h"
-#include "SysSe/Bsp/Bsp.h"
-#include "IfxScuWdt.h"
-#include "StmDemo.h"
-
-/******************************************************************************/
-/*------------------------Inline Function Prototypes--------------------------*/
-/******************************************************************************/
+#include "Cpu/Irq/IfxCpu_Irq.h"
 
 /******************************************************************************/
 /*-----------------------------------Macros-----------------------------------*/
 /******************************************************************************/
 
 /******************************************************************************/
-/*------------------------Private Variables/Constants-------------------------*/
+/*--------------------------------Enumerations--------------------------------*/
+/******************************************************************************/
+/******************************************************************************/
+/*-----------------------------Data Structures--------------------------------*/
 /******************************************************************************/
 
+typedef struct
+{
+    Ifx_STM             *stmSfr;            /**< \brief Pointer to Stm register base */
+    IfxStm_CompareConfig stmConfig;         /**< \brief Stm Configuration structure */
+    volatile uint8       LedBlink;          /**< \brief LED state variable */
+    volatile uint32      counter;           /**< \brief interrupt counter */
+} App_Stm;
 /******************************************************************************/
 /*------------------------------Global variables------------------------------*/
 /******************************************************************************/
-App_Cpu0 g_AppCpu0; /**< \brief CPU 0 global data */
-
+IFX_EXTERN App_Stm g_Stm;
 /******************************************************************************/
-/*-------------------------Function Implementations---------------------------*/
+/*-------------------------Function Prototypes--------------------------------*/
 /******************************************************************************/
+IFX_EXTERN void IfxStmDemo_init(void);
+IFX_EXTERN void IfxStmDemo_run(void);
 
-/** \brief Main entry point after CPU boot-up.
- *
- *  It initialise the system and enter the endless loop that handles the demo
- */
-int core0_main(void)
-{
-    /*
-     * !!WATCHDOG0 AND SAFETY WATCHDOG ARE DISABLED HERE!!
-     * Enable the watchdog in the demo if it is required and also service the watchdog periodically
-     * */
-    IfxScuWdt_disableCpuWatchdog(IfxScuWdt_getCpuWatchdogPassword());
-    IfxScuWdt_disableSafetyWatchdog(IfxScuWdt_getSafetyWatchdogPassword());
-
-    /* Initialise the application state */
-    g_AppCpu0.info.pllFreq = IfxScuCcu_getPllFrequency();
-    g_AppCpu0.info.cpuFreq = IfxScuCcu_getCpuFrequency(IfxCpu_getCoreIndex());
-    g_AppCpu0.info.sysFreq = IfxScuCcu_getSpbFrequency();
-    g_AppCpu0.info.stmFreq = IfxStm_getFrequency(&MODULE_STM0);
-
-    /* Enable the global interrupts of this CPU */
-    IfxCpu_enableInterrupts();
-
-    /* Demo init */
-    IfxStmDemo_init();
-
-    /* background endless loop */
-    while (TRUE)
-    {
-        IfxStmDemo_run();
-
-        REGRESSION_RUN_STOP_PASS;
-    }
-
-    return 0;
-}
-
-
-/** \} */
+#endif

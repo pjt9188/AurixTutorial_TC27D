@@ -1,9 +1,9 @@
 /**
  * \file Cpu1_Main.c
- * \brief Main function definition for Cpu core 1 .
+ * \brief CPU1 functions.
  *
- * \copyright Copyright (c) 2018 Infineon Technologies AG. All rights reserved.
- *
+ * \version iLLD_Demos_1_0_1_8_0
+ * \copyright Copyright (c) 2014 Infineon Technologies AG. All rights reserved.
  *
  *
  *                                 IMPORTANT NOTICE
@@ -19,29 +19,44 @@
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE.
  * INFINEON SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL,
  * OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
- *
  */
 
-#include "Ifx_Types.h"
-#include "IfxCpu.h"
+/******************************************************************************/
+/*----------------------------------Includes----------------------------------*/
+/******************************************************************************/
+
+#include "Cpu0_Main.h"
 #include "IfxScuWdt.h"
 
-extern IfxCpu_syncEvent cpuSyncEvent;
+/******************************************************************************/
+/*------------------------Inline Function Prototypes--------------------------*/
+/******************************************************************************/
 
-int core1_main (void)
+/******************************************************************************/
+/*-----------------------------------Macros-----------------------------------*/
+/******************************************************************************/
+
+/******************************************************************************/
+/*------------------------Private Variables/Constants-------------------------*/
+/******************************************************************************/
+
+/******************************************************************************/
+/*------------------------------Global variables------------------------------*/
+/******************************************************************************/
+
+/******************************************************************************/
+/*-------------------------Function Implementations---------------------------*/
+/******************************************************************************/
+/** \brief Main entry point for CPU1  */
+void core1_main(void)
 {
-    IfxCpu_enableInterrupts();
     /*
      * !!WATCHDOG1 IS DISABLED HERE!!
      * Enable the watchdog in the demo if it is required and also service the watchdog periodically
      * */
-    IfxScuWdt_disableCpuWatchdog (IfxScuWdt_getCpuWatchdogPassword ());
+    IfxScuWdt_disableCpuWatchdog(IfxScuWdt_getCpuWatchdogPassword());
 
-    /* Cpu sync event wait*/
-    IfxCpu_emitEvent(&cpuSyncEvent);
-    IfxCpu_waitEvent(&cpuSyncEvent, 1);
-    while (1)
-    {
-    }
-    return (1);
+    /* background endless loop */
+    while (TRUE)
+    {}
 }

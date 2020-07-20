@@ -1,6 +1,6 @@
 /**
- * \file Cpu2_Main.c
- * \brief CPU2 functions.
+ * \file Cpu0_Main.h
+ * \brief System initialization and main program implementation.
  *
  * \version iLLD_Demos_1_0_1_8_0
  * \copyright Copyright (c) 2014 Infineon Technologies AG. All rights reserved.
@@ -19,44 +19,48 @@
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE.
  * INFINEON SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL,
  * OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+ *
+ * \defgroup IfxLld_Demo_STMDemo_SrcDoc Source code documentation
+ * \ingroup IfxLld_Demo_STMDemo
+ *
  */
- 
+
+#ifndef CPU0_MAIN_H
+#define CPU0_MAIN_H
+
 /******************************************************************************/
 /*----------------------------------Includes----------------------------------*/
 /******************************************************************************/
 
-#include "Cpu0_Main.h"
-#include "IfxScuWdt.h"
+#include "Configuration.h"
 
-/******************************************************************************/
-/*------------------------Inline Function Prototypes--------------------------*/
-/******************************************************************************/
-
+#include "Cpu/Std/Ifx_Types.h"
 /******************************************************************************/
 /*-----------------------------------Macros-----------------------------------*/
 /******************************************************************************/
 
 /******************************************************************************/
-/*------------------------Private Variables/Constants-------------------------*/
+/*------------------------------Type Definitions------------------------------*/
 /******************************************************************************/
+
+typedef struct
+{
+    float32 sysFreq;                /**< \brief Actual SPB frequency */
+    float32 cpuFreq;                /**< \brief Actual CPU frequency */
+    float32 pllFreq;                /**< \brief Actual PLL frequency */
+    float32 stmFreq;                /**< \brief Actual STM frequency */
+} AppInfo;
+
+/** \brief Application information */
+typedef struct
+{
+    AppInfo info;                               /**< \brief Info object */
+} App_Cpu0;
 
 /******************************************************************************/
 /*------------------------------Global variables------------------------------*/
 /******************************************************************************/
 
-/******************************************************************************/
-/*-------------------------Function Implementations---------------------------*/
-/******************************************************************************/
-/** \brief Main entry point for CPU2 */
-void core2_main(void)
-{
-    /*
-     * !!WATCHDOG2 IS DISABLED HERE!!
-     * Enable the watchdog in the demo if it is required and also service the watchdog periodically
-     * */
-    IfxScuWdt_disableCpuWatchdog(IfxScuWdt_getCpuWatchdogPassword());
+IFX_EXTERN App_Cpu0 g_AppCpu0;
 
-    /* background endless loop */
-    while (TRUE)
-    {}
-}
+#endif
