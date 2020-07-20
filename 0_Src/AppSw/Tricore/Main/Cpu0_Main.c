@@ -28,7 +28,7 @@
 #include "Cpu0_Main.h"
 #include "SysSe/Bsp/Bsp.h"
 #include "IfxScuWdt.h"
-#include "StmDemo.h"
+#include "Stm.h"
 
 /******************************************************************************/
 /*------------------------Inline Function Prototypes--------------------------*/
@@ -74,12 +74,12 @@ int core0_main(void)
     IfxCpu_enableInterrupts();
 
     /* Demo init */
-    IfxStmDemo_init();
+    Stm_init();
 
     /* background endless loop */
     while (TRUE)
     {
-        IfxStmDemo_run();
+        Stm_run();
 
         REGRESSION_RUN_STOP_PASS;
     }

@@ -1,6 +1,6 @@
 /**
- * \file StmDemo.c
- * \brief Stm Demo
+ * \file Stm.c
+ * \brief Stm
  *
  * \version iLLD_Demos_1_0_1_8_0
  * \copyright Copyright (c) 2014 Infineon Technologies AG. All rights reserved.
@@ -27,7 +27,7 @@
 
 #include <stdio.h>
 
-#include "StmDemo.h"
+#include "Stm.h"
 
 /******************************************************************************/
 /*-----------------------------------Macros-----------------------------------*/
@@ -50,7 +50,7 @@ App_Stm g_Stm; /**< \brief Stm global data */
 /*-------------------------Function Prototypes--------------------------------*/
 /******************************************************************************/
 static void IfxBlinkLed_Task(void);
-static void IfxBlinkLed_Init(void);
+// static void IfxBlinkLed_Init(void);
 /******************************************************************************/
 /*------------------------Private Variables/Constants-------------------------*/
 /******************************************************************************/
@@ -86,60 +86,29 @@ void STM_Int0Handler(void)
 }
 
 
-/** \brief Port Pin State
- *
- * This function changes the Port Pin state
- */
-static void setOutputPin(Ifx_P *port, uint8 pin, boolean state)
-{
-    if (state)
-    {
-        IfxPort_setPinState(port, pin, IfxPort_State_high);
-    }
-    else
-    {
-        IfxPort_setPinState(port, pin, IfxPort_State_low);
-    }
-}
-
-
 /** \brief LED Blinking
  *
- * This function blinks the LED connected to P 33.6 and counts the number
+ * This function blinks the LED connected to P 10.2 and counts the number
  *	of times the interrupt occurs.
  */
 static void IfxBlinkLed_Task(void)
 {
-    g_Stm.LedBlink ^= 1;
-
-    setOutputPin(&MODULE_P33, 6, g_Stm.LedBlink);
-
+    Led_toggle();
     g_Stm.counter++;
 }
 
 
-/** \brief LED Initialization
- *
- * This function initializes the LED connected to P33.6
- */
-static void IfxBlinkLed_Init(void)
-{
-    IfxPort_setPinMode(&MODULE_P33, 6, IfxPort_Mode_outputPushPullGeneral);
-}
-
-
-/** \brief Demo init API
+/** \brief Stm init API
  *
  * This function is called from main during initialization phase
  */
-void IfxStmDemo_init(void)
+void Stm_init(void)
 {
-    printf("IfxStmDemo_init() called\n");
+    printf("Stm_init() called\n");
 
     /* disable interrupts */
     boolean interruptState = IfxCpu_disableInterrupts();
 
-    g_Stm.LedBlink = 0;
     g_Stm.counter  = 0;
 
     initTime();
@@ -156,7 +125,7 @@ void IfxStmDemo_init(void)
 #endif
     IfxStm_initCompare(g_Stm.stmSfr, &g_Stm.stmConfig);
 
-    IfxBlinkLed_Init();
+    Led_init();
 
     /* enable interrupts again */
     IfxCpu_restoreInterrupts(interruptState);
@@ -167,12 +136,15 @@ void IfxStmDemo_init(void)
  *
  * This function is called from main, background loop
  */
-void IfxStmDemo_run(void)
+void Stm_run(void)
 {
-    printf("IfxStmDemo_run() called\n");
+    printf("Stm_run() called\n");
 
     while (g_Stm.counter < 10)
     {}
 
     printf("OK: checks passed \n");
+
+    while(TRUE)
+    {}
 }

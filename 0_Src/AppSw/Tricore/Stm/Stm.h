@@ -1,5 +1,5 @@
 /**
- * \file StmDemo.h
+ * \file Stm.h
  * \brief Demo Template
  * \version iLLD_Demos_1_0_1_8_0
  * \copyright Copyright (c) 2014 Infineon Technologies AG. All rights reserved.
@@ -24,8 +24,8 @@
  * \ingroup IfxLld_Demo_StmDemo_SrcDoc_Main
  */
 
-#ifndef STMDEMO_H
-#define STMDEMO_H 1
+#ifndef STM_H
+#define STM_H 1
 /******************************************************************************/
 /*----------------------------------Includes----------------------------------*/
 /******************************************************************************/
@@ -39,7 +39,9 @@
 #include <Src/Std/IfxSrc.h>
 #include "Cpu0_Main.h"
 #include "Cpu/Irq/IfxCpu_Irq.h"
+#include "simio_pls.h"
 
+#include "Led.h"
 /******************************************************************************/
 /*-----------------------------------Macros-----------------------------------*/
 /******************************************************************************/
@@ -55,7 +57,6 @@ typedef struct
 {
     Ifx_STM             *stmSfr;            /**< \brief Pointer to Stm register base */
     IfxStm_CompareConfig stmConfig;         /**< \brief Stm Configuration structure */
-    volatile uint8       LedBlink;          /**< \brief LED state variable */
     volatile uint32      counter;           /**< \brief interrupt counter */
 } App_Stm;
 /******************************************************************************/
@@ -65,7 +66,7 @@ IFX_EXTERN App_Stm g_Stm;
 /******************************************************************************/
 /*-------------------------Function Prototypes--------------------------------*/
 /******************************************************************************/
-IFX_EXTERN void IfxStmDemo_init(void);
-IFX_EXTERN void IfxStmDemo_run(void);
+IFX_EXTERN void Stm_init(void);
+IFX_EXTERN void Stm_run(void);
 
 #endif
