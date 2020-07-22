@@ -4,5 +4,5 @@
 - 사용보드 : Shield Buddy TC275
 
 ## 요약정리
-- [Twinkle Twinkle Little Star](docs\TwinkleTwinkleLittleStar.md)
-- [Multiple Infinite Loops](docs\MultipleInfiniteLoops.md)
+- [Twinkle Twinkle Little Star](docs/TwinkleTwinkleLittleStar.md)
+- [Multiple Infinite Loops](docs/MultipleInfiniteLoops.md)
