@@ -41,6 +41,7 @@
 #include "Cpu/Irq/IfxCpu_Irq.h"
 #include "simio_pls.h"
 
+#include "Scheduler.h"
 #include "Led.h"
 /******************************************************************************/
 /*-----------------------------------Macros-----------------------------------*/
@@ -57,14 +58,17 @@ typedef struct
 {
     Ifx_STM             *stmSfr;            /**< \brief Pointer to Stm register base */
     IfxStm_CompareConfig stmConfig;         /**< \brief Stm Configuration structure */
-    volatile uint32      counter;           /**< \brief interrupt counter */
+    // volatile uint32      counter;           /**< \brief interrupt counter */
 } App_Stm;
+
 /******************************************************************************/
 /*------------------------------Global variables------------------------------*/
 /******************************************************************************/
+
 IFX_EXTERN App_Stm g_Stm;
+
 /******************************************************************************/
-/*-------------------------Function Prototypes--------------------------------*/
+/*-------------------------Global Function Prototypes-------------------------*/
 /******************************************************************************/
 IFX_EXTERN void Stm_init(void);
 IFX_EXTERN void Stm_run(void);

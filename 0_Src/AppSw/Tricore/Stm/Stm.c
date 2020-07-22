@@ -49,8 +49,10 @@ App_Stm g_Stm; /**< \brief Stm global data */
 /******************************************************************************/
 /*-------------------------Function Prototypes--------------------------------*/
 /******************************************************************************/
-static void IfxBlinkLed_Task(void);
-// static void IfxBlinkLed_Init(void);
+
+void Stm_init(void);
+void Stm_run(void);
+
 /******************************************************************************/
 /*------------------------Private Variables/Constants-------------------------*/
 /******************************************************************************/
@@ -63,7 +65,7 @@ static void IfxBlinkLed_Task(void);
 
 /** \name Interrupts for SystemTimer(STM) driver.
  * \{ */
-IFX_INTERRUPT(STM_Int0Handler, 0, ISR_PRIORITY_STM_INT0);
+IFX_INTERRUPT(STM_Stm0Sr0Handler, 0, ISR_PRIORITY_STM_STM0SR0);
 /** \} */
 
 /** \} */
@@ -73,28 +75,35 @@ IFX_INTERRUPT(STM_Int0Handler, 0, ISR_PRIORITY_STM_INT0);
  * \isrPriority \ref ISR_PRIORITY_SystemTimer(STM)
  *
  */
-void STM_Int0Handler(void)
+void STM_Stm0Sr0Handler(void)
 {
     IfxStm_clearCompareFlag(g_Stm.stmSfr, g_Stm.stmConfig.comparator);
 #ifdef SIMULATION
 	IfxStm_increaseCompare(g_Stm.stmSfr, g_Stm.stmConfig.comparator, 1000);
 #else
-	IfxStm_increaseCompare(g_Stm.stmSfr, g_Stm.stmConfig.comparator, TimeConst_1s);
+	IfxStm_increaseCompare(g_Stm.stmSfr, g_Stm.stmConfig.comparator, g_Stm.stmConfig.ticks);
 #endif
     IfxCpu_enableInterrupts();
-    IfxBlinkLed_Task();
-}
+    
+    g_Scheduler.counter++;
 
+    if(g_Scheduler.counter == 1000){
+        g_Scheduler.counter = 0;
+    }
 
-/** \brief LED Blinking
- *
- * This function blinks the LED connected to P 10.2 and counts the number
- *	of times the interrupt occurs.
- */
-static void IfxBlinkLed_Task(void)
-{
-    Led_toggle();
-    g_Stm.counter++;
+    g_Scheduler.taskFlag_1ms = TRUE;
+    
+    if(g_Scheduler.counter % 10 == 0){
+        g_Scheduler.taskFlag_10ms = TRUE;
+    }
+
+    if(g_Scheduler.counter % 100 == 0){
+        g_Scheduler.taskFlag_100ms = TRUE;
+    }
+
+    if(g_Scheduler.counter % 1000 == 0){
+        g_Scheduler.taskFlag_1s = TRUE;
+    }
 }
 
 
@@ -109,22 +118,21 @@ void Stm_init(void)
     /* disable interrupts */
     boolean interruptState = IfxCpu_disableInterrupts();
 
-    g_Stm.counter  = 0;
-
     initTime();
 
     g_Stm.stmSfr = &MODULE_STM0;
     IfxStm_initCompareConfig(&g_Stm.stmConfig);
 
-    g_Stm.stmConfig.triggerPriority = ISR_PRIORITY_STM_INT0;
-    g_Stm.stmConfig.typeOfService   = IfxSrc_Tos_cpu0;
+    g_Stm.stmConfig.triggerPriority = ISR_PRIORITY_STM_STM0SR0;
+    g_Stm.stmConfig.typeOfService   = ISR_PROVIDER_STM_STM0SR0;
 #ifdef SIMULATION
     g_SrcSwInt.stmConfig.ticks      = 1000;
 #else
-    g_Stm.stmConfig.ticks           = TimeConst_1s;
+    g_Stm.stmConfig.ticks           = TimeConst_1ms;
 #endif
     IfxStm_initCompare(g_Stm.stmSfr, &g_Stm.stmConfig);
 
+    Scheduler_init();
     Led_init();
 
     /* enable interrupts again */
@@ -138,13 +146,20 @@ void Stm_init(void)
  */
 void Stm_run(void)
 {
-    printf("Stm_run() called\n");
-
-    while (g_Stm.counter < 10)
-    {}
-
-    printf("OK: checks passed \n");
-
-    while(TRUE)
-    {}
+    if(g_Scheduler.taskFlag_1ms == TRUE){
+        Scheduler_appTaskFlag_1ms();
+        g_Scheduler.taskFlag_1ms = FALSE;
+    }
+    if(g_Scheduler.taskFlag_10ms == TRUE){
+        Scheduler_appTaskFlag_10ms();
+        g_Scheduler.taskFlag_10ms = FALSE;
+    }
+    if(g_Scheduler.taskFlag_100ms == TRUE){
+        Scheduler_appTaskFlag_100ms();
+        g_Scheduler.taskFlag_100ms = FALSE;
+    }
+    if(g_Scheduler.taskFlag_1s == TRUE){
+        Scheduler_appTaskFlag_1s();
+        g_Scheduler.taskFlag_1s = FALSE;
+    }
 }

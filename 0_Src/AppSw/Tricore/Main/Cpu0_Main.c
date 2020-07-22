@@ -73,7 +73,7 @@ int core0_main(void)
     /* Enable the global interrupts of this CPU */
     IfxCpu_enableInterrupts();
 
-    /* Demo init */
+    /* Stm init */
     Stm_init();
 
     /* background endless loop */
