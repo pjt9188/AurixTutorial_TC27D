@@ -140,26 +140,9 @@ void Stm_init(void)
 }
 
 
-/** \brief Demo run API
+/** \brief STM run API
  *
  * This function is called from main, background loop
  */
 void Stm_run(void)
-{
-    if(g_Scheduler.taskFlag_1ms == TRUE){
-        Scheduler_appTaskFlag_1ms();
-        g_Scheduler.taskFlag_1ms = FALSE;
-    }
-    if(g_Scheduler.taskFlag_10ms == TRUE){
-        Scheduler_appTaskFlag_10ms();
-        g_Scheduler.taskFlag_10ms = FALSE;
-    }
-    if(g_Scheduler.taskFlag_100ms == TRUE){
-        Scheduler_appTaskFlag_100ms();
-        g_Scheduler.taskFlag_100ms = FALSE;
-    }
-    if(g_Scheduler.taskFlag_1s == TRUE){
-        Scheduler_appTaskFlag_1s();
-        g_Scheduler.taskFlag_1s = FALSE;
-    }
-}
+{}

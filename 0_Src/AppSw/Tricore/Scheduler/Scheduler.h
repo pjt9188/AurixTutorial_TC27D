@@ -45,6 +45,7 @@ IFX_EXTERN App_Scheduler g_Scheduler;
 /******************************************************************************/
 
 IFX_EXTERN void Scheduler_init(void);
+IFX_EXTERN void Scheduler_run(void);
 IFX_EXTERN void Scheduler_appTaskFlag_1ms(void);
 IFX_EXTERN void Scheduler_appTaskFlag_10ms(void);
 IFX_EXTERN void Scheduler_appTaskFlag_100ms(void);

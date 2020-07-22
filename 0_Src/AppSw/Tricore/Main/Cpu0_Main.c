@@ -29,6 +29,7 @@
 #include "SysSe/Bsp/Bsp.h"
 #include "IfxScuWdt.h"
 #include "Stm.h"
+#include "Scheduler.h"
 
 /******************************************************************************/
 /*------------------------Inline Function Prototypes--------------------------*/
@@ -79,7 +80,7 @@ int core0_main(void)
     /* background endless loop */
     while (TRUE)
     {
-        Stm_run();
+        Scheduler_run();
 
         REGRESSION_RUN_STOP_PASS;
     }
