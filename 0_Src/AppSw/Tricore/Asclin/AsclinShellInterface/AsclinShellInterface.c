@@ -30,15 +30,16 @@
 #include "IfxLldVersion.h"
 #include "_Impl/IfxGlobal_cfg.h"
 #include "Cpu0_Main.h"
+#include <SysSe\Bsp\Assert.h>
 
 /******************************************************************************/
 /*-----------------------------------Macros-----------------------------------*/
 /******************************************************************************/
 
-#define SHELL_HELP_DESCRIPTION_TEXT                                 \
-    "     : Display command list."ENDL                              \
-    "           A command followed by a question mark '?' will"ENDL \
-    "           show the command syntax"
+// #define SHELL_HELP_DESCRIPTION_TEXT                                 \
+//     "     : Display command list."ENDL                              \
+//     "           A command followed by a question mark '?' will"ENDL \
+//     "           show the command syntax"
 
 /******************************************************************************/
 /*--------------------------------Enumerations--------------------------------*/
@@ -68,7 +69,7 @@ boolean AppShell_info(pchar args, void *data, IfxStdIf_DPipe *io);
 /** \brief Application shell command list */
 const Ifx_Shell_Command AppShell_commands[] = {
     {"status", "   : Show the application status", &g_AsclinShellInterface,       &AppShell_status,    },
-    {"info",   "     : Show the welcome screen",   &g_AsclinShellInterface,       &AppShell_info,      },
+    {"info",   "   : Show the welcome screen",     &g_AsclinShellInterface,       &AppShell_info,      },
     {"help",   SHELL_HELP_DESCRIPTION_TEXT,        &g_AsclinShellInterface.shell, &Ifx_Shell_showHelp, },
     IFX_SHELL_COMMAND_LIST_END
 };
@@ -82,9 +83,9 @@ const Ifx_Shell_Command AppShell_commands[] = {
 /** \name Interrupts for Serial interface
  * \{ */
 
-IFX_INTERRUPT(ISR_Asc_0_rx, 0, ISR_PRIORITY_ASC_0_RX);
-IFX_INTERRUPT(ISR_Asc_0_tx, 0, ISR_PRIORITY_ASC_0_TX);
-IFX_INTERRUPT(ISR_Asc_0_ex, 0, ISR_PRIORITY_ASC_0_EX);
+IFX_INTERRUPT(ISR_Asc_3_tx, 0, ISR_PRIORITY_ASC_3_RX);
+IFX_INTERRUPT(ISR_Asc_3_tx, 0, ISR_PRIORITY_ASC_3_TX);
+IFX_INTERRUPT(ISR_Asc_3_ex, 0, ISR_PRIORITY_ASC_3_EX);
 
 /** \} */
 
@@ -99,7 +100,7 @@ IFX_INTERRUPT(ISR_Asc_0_ex, 0, ISR_PRIORITY_ASC_0_EX);
  * - This interrupt is raised each time a data have been received on the serial interface.
  *   and Asc_If_receiveIrq() will be called
  */
-void ISR_Asc_0_rx(void)
+void ISR_Asc_3_rx(void)
 {
     IfxCpu_enableInterrupts();
     IfxStdIf_DPipe_onReceive(&g_AsclinShellInterface.stdIf.asc);
@@ -115,7 +116,7 @@ void ISR_Asc_0_rx(void)
  * - This interrupt is raised each time the serial interface transmit buffer get empty
  *   and Asc_If_transmitIrq() will be called
  */
-void ISR_Asc_0_tx(void)
+void ISR_Asc_3_tx(void)
 {
     IfxCpu_enableInterrupts();
     IfxStdIf_DPipe_onTransmit(&g_AsclinShellInterface.stdIf.asc);
@@ -131,7 +132,7 @@ void ISR_Asc_0_tx(void)
  * - This interrupt is raised each time an error occurs on the serial interface and
  *   Asc_If_errorIrq() will be called.
  */
-void ISR_Asc_0_ex(void)
+void ISR_Asc_3_ex(void)
 {
     IfxCpu_enableInterrupts();
     IfxStdIf_DPipe_onError(&g_AsclinShellInterface.stdIf.asc);
@@ -224,23 +225,23 @@ void initSerialInterface(void)
 {
     {   /** - Serial interface */
         IfxAsclin_Asc_Config config;
-        IfxAsclin_Asc_initModuleConfig(&config, &MODULE_ASCLIN0);
+        IfxAsclin_Asc_initModuleConfig(&config, &MODULE_ASCLIN3);
         config.baudrate.baudrate             = CFG_ASC_BAUDRATE;
         config.baudrate.oversampling         = IfxAsclin_OversamplingFactor_16;
         config.bitTiming.medianFilter        = IfxAsclin_SamplesPerBit_three;
         config.bitTiming.samplePointPosition = IfxAsclin_SamplePointPosition_8;
-        config.interrupt.rxPriority          = ISR_PRIORITY(INTERRUPT_ASC_0_RX);
-        config.interrupt.txPriority          = ISR_PRIORITY(INTERRUPT_ASC_0_TX);
-        config.interrupt.erPriority          = ISR_PRIORITY(INTERRUPT_ASC_0_EX);
-        config.interrupt.typeOfService       = ISR_PROVIDER_ASC_0;
+        config.interrupt.rxPriority          = ISR_PRIORITY(INTERRUPT_ASC_3_RX);
+        config.interrupt.txPriority          = ISR_PRIORITY(INTERRUPT_ASC_3_TX);
+        config.interrupt.erPriority          = ISR_PRIORITY(INTERRUPT_ASC_3_EX);
+        config.interrupt.typeOfService       = ISR_PROVIDER_ASC_3;
         IfxAsclin_Asc_Pins ascPins = {
             .cts       = NULL_PTR,
             .ctsMode   = IfxPort_InputMode_noPullDevice,
-            .rx        = &IfxAsclin0_RXB_P15_3_IN,
+            .rx        = &IfxAsclin3_RXD_P32_2_IN,
             .rxMode    = IfxPort_InputMode_noPullDevice,
             .rts       = NULL_PTR,
             .rtsMode   = IfxPort_OutputMode_pushPull,
-            .tx        = &IfxAsclin0_TX_P15_2_OUT,
+            .tx        = &IfxAsclin3_TX_P15_7_OUT,
             .txMode    = IfxPort_OutputMode_pushPull,
             .pinDriver = IfxPort_PadDriver_cmosAutomotiveSpeed1
         };
@@ -261,7 +262,6 @@ void initSerialInterface(void)
     /* Assert initialisation */
     Ifx_Assert_setStandardIo(&g_AsclinShellInterface.stdIf.asc);
 }
-
 
 void AsclinShellInterface_init(void)
 {

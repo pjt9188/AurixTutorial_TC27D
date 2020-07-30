@@ -53,8 +53,8 @@
  */
 
 #define ISR_PRIORITY_ASC_3_RX     4         /**< \brief Define the ASCLIN1 receive interrupt priority.  */
-#define ISR_PRIORITY_ASC_3_TX     5         /**< \brief Define the ASCLIN1 transmit interrupt priority.  */
-#define ISR_PRIORITY_ASC_3_ER     6         /**< \brief Define the ASCLIN1 error interrupt priority.  */
+#define ISR_PRIORITY_ASC_3_TX     8         /**< \brief Define the ASCLIN1 transmit interrupt priority.  */
+#define ISR_PRIORITY_ASC_3_EX     12         /**< \brief Define the ASCLIN1 error interrupt priority.  */
 #define ISR_PRIORITY_STM_STM0SR0  40        /**< \brief Define the System Timer Interrupt priority.  */
 /** \} */
 
@@ -73,7 +73,7 @@
 
 #define INTERRUPT_ASC_3_RX        ISR_ASSIGN(ISR_PRIORITY_ASC_3_RX, ISR_PROVIDER_ASC_3)         /**< \brief Install the ASCLIN1 receive interrupt handler.  */
 #define INTERRUPT_ASC_3_TX        ISR_ASSIGN(ISR_PRIORITY_ASC_3_TX, ISR_PROVIDER_ASC_3)         /**< \brief Install the ASCLIN1 transmit interrupt handler.  */
-#define INTERRUPT_ASC_3_ER        ISR_ASSIGN(ISR_PRIORITY_ASC_3_ER, ISR_PROVIDER_ASC_3)         /**< \brief Install the ASCLIN1 error interrupt handler.  */
+#define INTERRUPT_ASC_3_EX        ISR_ASSIGN(ISR_PRIORITY_ASC_3_EX, ISR_PROVIDER_ASC_3)         /**< \brief Install the ASCLIN1 error interrupt handler.  */
 
 #define INTERRUPT_STM_STM0SR0       ISR_ASSIGN(ISR_PRIORITY_STM_INT0, ISR_PROVIDER_STM_INT0)                            /**< \brief Define the System Timer interrupt priority.  */
 /** \} */

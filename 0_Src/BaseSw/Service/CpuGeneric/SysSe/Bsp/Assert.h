@@ -53,7 +53,7 @@
  * \{ */
 
 #ifndef IFX_CFG_ASSERT_STDIO
-#    define IFX_CFG_ASSERT_STDIO (0) /**<  \brief If set to 1, the assert message is send to the Assert_io interface */
+#    define IFX_CFG_ASSERT_STDIO (1) /**<  \brief If set to 1, the assert message is send to the Assert_io interface */
 #endif
 
 #if IFX_CFG_ASSERT_STDIO == 1

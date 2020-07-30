@@ -84,7 +84,7 @@ IFX_INTERRUPT(asclin3RxISR, 0, ISR_PRIORITY_ASC_3_RX)
 /** \name Interrupts for Error
  * \{ */
 
-IFX_INTERRUPT(asclin3ErISR, 0, ISR_PRIORITY_ASC_3_ER)
+IFX_INTERRUPT(asclin3ErISR, 0, ISR_PRIORITY_ASC_3_EX)
 {
     IfxAsclin_Asc_isrError(&g_AsclinAsc.drivers.asc3);
 }
@@ -114,7 +114,7 @@ void AsclinAscDemo_init(void)
     /* ISR priorities and interrupt target */
     ascConfig.interrupt.txPriority    = ISR_PRIORITY_ASC_3_TX;
     ascConfig.interrupt.rxPriority    = ISR_PRIORITY_ASC_3_RX;
-    ascConfig.interrupt.erPriority    = ISR_PRIORITY_ASC_3_ER;
+    ascConfig.interrupt.erPriority    = ISR_PRIORITY_ASC_3_EX;
     ascConfig.interrupt.typeOfService = (IfxSrc_Tos)IfxCpu_getCoreIndex();
 
     /* FIFO configuration */

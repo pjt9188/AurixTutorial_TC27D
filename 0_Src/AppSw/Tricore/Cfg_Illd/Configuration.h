@@ -41,6 +41,15 @@
 
 /** \addtogroup IfxLld_Demo_Template_SrcDoc_Config
  * \{ */
+
+/** \addtogroup IfxLld_Demo_AsclinShellInterface_SrcDoc_Config
+ * \{ */
+
+#define CFG_ASC_BAUDRATE       (115200.0)                   /**< \brief Define the Baudrate */
+#define CFG_ASC_RX_BUFFER_SIZE (512)                        /**< \brief Define the Rx buffer size in byte. */
+#define CFG_ASC_TX_BUFFER_SIZE (6 * 1024)                   /**< \brief Define the Tx buffer size in byte. */
+
+
 /*______________________________________________________________________________
 ** Help Macros
 **____________________________________________________________________________*/
