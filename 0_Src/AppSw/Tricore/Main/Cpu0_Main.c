@@ -30,8 +30,8 @@
 #include "IfxScuWdt.h"
 #include "Stm.h"
 #include "Scheduler.h"
-// #include "AsclinAscDemo.h"
-#include "AsclinShellInterface.h"
+#include "AsclinAscDemo.h"
+// #include "AsclinShellInterface.h"
 
 /******************************************************************************/
 /*------------------------Inline Function Prototypes--------------------------*/
@@ -80,21 +80,19 @@ int core0_main(void)
     Stm_init();
     Led_BlinkSeveralTimes(2);
 
-    // /* AsclinAscDemo init */
-    // AsclinAscDemo_init();
-    
-    // IfxStm_waitTicks(g_Stm.stmSfr, TimeConst_1s * 5);
-    // AsclinAscDemo_run();
+    /* AsclinAscDemo init */
+    AsclinAscDemo_init();
+    AsclinAscDemo_run();
 
     /* AsclinShellInterface init*/
-    AsclinShellInterface_init();
+    // AsclinShellInterface_init();
 
     /* background endless loop */
     while (TRUE)
     {
         // Scheduler_run();
         /* AsclinShellInterface run*/
-        AsclinShellInterface_run();
+        // AsclinShellInterface_run();
 
         REGRESSION_RUN_STOP_PASS;
     }

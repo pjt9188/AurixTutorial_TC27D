@@ -160,7 +160,16 @@ void AsclinAscDemo_run(void)
 
     for (i = 0; i < g_AsclinAsc.count; ++i)
     {
-        g_AsclinAsc.txData[i] = i + 1;    /* {1, 2, 3 ,4 ,5} */
+        
+        /* 원본 Demo Code */
+        // g_AsclinAsc.txData[i] = i + 1;    /* {1, 2, 3 ,4 ,5} */
+/*      
+**      Terminal에 출력되는 것은 ASCII코드 기준이므로 위의 Demo코드로 진행하였을 때, 
+**      TeraTerm에 1 2 3 4 5가 출력이 되지 않는 문제가 발생한다.
+**      따라서 ASCII코드 기준의 1,2,3,4,5가 출력될 수 있도록 코드를 수정하여야 한다.
+**      g_AsclinAsc.txData[i] = i + 1;에서 1이 아니라 '1'혹은 ASCII코드 기준 49를 더해주는 것으로 수정해주어야 한다.
+*/
+        g_AsclinAsc.txData[i] = i + '1';    // ASCII Code 기준 '1', '2', '3' ,'4' ,'5'
         g_AsclinAsc.rxData[i] = 0;
     }
 
