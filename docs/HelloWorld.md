@@ -77,14 +77,14 @@
       
   - 송수신이 일어날 물리적 pin(TC23A: P14.0, 14.1, TC27D: P32.2, 15.7)을 고른다.
     (이번 예제의 경우 USB로 컴퓨터와 연결하여 콘솔과 통신할 것이므로 TC27D의 경우 ASCLIN의 ASC3을 쓴다)
-    ![TC275_ASCLIN_ConnectorMapping](Images/TC275_ASCLIN_ConnectorMapping.png)
+    ![TC275_ASCLIN_ConnectorMapping](Images/HelloWorld/TC275_ASCLIN_ConnectorMapping.png)
   
   - Data 전송 속도를 정한 뒤, (AURIX와 통신을 진행하는 기기와 동일하게 맞춤)
     * Baudrate(보 레이트)
       - 1초당 변조 횟수 혹은 심볼(Symbol, 의미 있는 데이터 묶음)개수; 이론적인 통신 단위로 초당 신호(Signal) 요소의 수를 나타낸다.
       - 예를 들어 의미 있는 데이터 묶음이 8bit이고 BPS(Bit per second)가 9600bps라면, Baud rate는 1200 Baud로 표현할 수 있다.
       - Clock System of Asclin
-        ![Baudrate Generation](Images/ASC_BaudRate_Generation_4.png)
+        ![Baudrate Generation](Images/HelloWorld/ASC_BaudRate_Generation_4.png)
 
         - Baudrate Configuration - 레지스터
           - BITCON.PRESCALER - the division ratio of the predivider
@@ -210,7 +210,15 @@ void AsclinAscDemo_run(void)
 
     for (i = 0; i < g_AsclinAsc.count; ++i)
     {
-        g_AsclinAsc.txData[i] = i + '1';    // {'1', '2', '3' ,'4' ,'5'}
+        /* 원본 Demo Code */
+//      g_AsclinAsc.txData[i] = i + '1';    // {'1', '2', '3' ,'4' ,'5'}
+
+/*      
+**      Terminal에 출력되는 것은 ASCII코드 기준이므로 위의 Demo코드로 진행하였을 때, 
+**      TeraTerm에 1 2 3 4 5가 출력이 안되는 문제가 발생된다.
+**      따라서 ASCII코드 기준의 1,2,3,4,5가 출력될 수 있도록 코드를 수정하여야 한다.
+*/
+        g_AsclinAsc.txData[i] = i + '49';    // ASCII Code 기준{'1', '2', '3' ,'4' ,'5'}
         g_AsclinAsc.rxData[i] = 0;
     }
 
@@ -258,3 +266,45 @@ void AsclinAscDemo_run(void)
 ### Simulated I/O를 통한 메세지 확인
 - 만약 board와 디버거가 연결되어 실행되고 있다면 설정해둔 <code>printf()</code> 메세지가 출력되는 것을 확인할 수 있다.
 ![simio 확인](https://aurixtutorial.readthedocs.io/ko/latest/images/HelloWorld_SimIO.png)
+
+---
+## 실습 실행 결과
+- 원본 코드 Data 송신 문제 해결
+  ```c
+  // in AsclinAscDemo.c
+  void AsclinAscDemo_run(void)
+  {
+      uint32 i, errors = 0;
+      g_AsclinAsc.count = 5;
+
+      for (i = 0; i < g_AsclinAsc.count; ++i)
+      {
+          /* 원본 Demo Code */
+  //      g_AsclinAsc.txData[i] = i + 1;    // {'1', '2', '3' ,'4' ,'5'}
+
+  /*      
+  **      Terminal에 출력되는 것은 ASCII코드 기준이므로 위의 Demo코드로 진행하였을 때, 
+  **      TeraTerm에 1 2 3 4 5가 출력이 안되는 문제가 발생된다.
+  **      따라서 ASCII코드 기준의 1,2,3,4,5가 출력될 수 있도록 코드를 수정하여야 한다.
+  **      g_AsclinAsc.txData[i] = i + 1;에서 1이 아니라 '1'혹은 ASCII코드 기준 49를 더해주는 것으로 수정해주어야 한다.
+  */
+          g_AsclinAsc.txData[i] = i + '1';    // ASCII Code 기준{'1', '2', '3' ,'4' ,'5'}
+          g_AsclinAsc.rxData[i] = 0;
+      }
+
+      IfxAsclin_Asc_write(&g_AsclinAsc.drivers.asc0, g_AsclinAsc.txData, &g_AsclinAsc.count, TIME_INFINITE);
+      IfxAsclin_Asc_read(&g_AsclinAsc.drivers.asc0, g_AsclinAsc.rxData, &g_AsclinAsc.count, TIME_INFINITE);
+      //...
+  }
+  ```
+
+- Tera Term을 통한 Data 송신확인
+  ![데이터출력](Images/HelloWorld/HelloWorld_TeraTermResult.png)
+
+- Tera Term을 통한 Data 수신확인
+  ![UDE 디버그 결과](Images/HelloWorld/HelloWorld_rxData_Error.png)
+  수신의 경우 rxData가 중간에 다른 값이 받아지는 경우가 생기는데 명확한 이유를 모르겠다.
+  (추측하기로 UDE에서 실행했을 때 UDE가 asclin에 영향을 주는 것 같다고 염형이 말했었던걸로 보아, 그것과 관련된 문제가 아닐지 추측된다)
+
+- Simulated I/O를 통한 메세지 확인
+  ![UDE simio 결과](Images/HelloWorld/HelloWorld_simio_Error.png)
