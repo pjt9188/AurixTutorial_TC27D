@@ -84,7 +84,7 @@ void STM_Stm0Sr0Handler(void)
 	IfxStm_increaseCompare(g_Stm.stmSfr, g_Stm.stmConfig.comparator, g_Stm.stmConfig.ticks);
 #endif
     IfxCpu_enableInterrupts();
-    
+
     g_Scheduler.counter++;
 
     if(g_Scheduler.counter == 1000){
@@ -103,6 +103,7 @@ void STM_Stm0Sr0Handler(void)
 
     if(g_Scheduler.counter % 1000 == 0){
         g_Scheduler.taskFlag_1s = TRUE;
+        Led_toggle();
     }
 }
 

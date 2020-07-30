@@ -30,6 +30,7 @@
 #include "IfxScuWdt.h"
 #include "Stm.h"
 #include "Scheduler.h"
+#include "AsclinAscDemo.h"
 
 /******************************************************************************/
 /*------------------------Inline Function Prototypes--------------------------*/
@@ -76,11 +77,18 @@ int core0_main(void)
 
     /* Stm init */
     Stm_init();
+    Led_BlinkSeveralTimes(2);
 
+    /* AsclinAscDemo init */
+    AsclinAscDemo_init();
+    
+    IfxStm_waitTicks(g_Stm.stmSfr, TimeConst_1s * 5);
+    AsclinAscDemo_run();
+    
     /* background endless loop */
     while (TRUE)
     {
-        Scheduler_run();
+        // Scheduler_run();
 
         REGRESSION_RUN_STOP_PASS;
     }

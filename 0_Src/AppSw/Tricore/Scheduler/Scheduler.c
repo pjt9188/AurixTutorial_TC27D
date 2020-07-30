@@ -8,6 +8,7 @@
 /******************************************************************************/
 
 #include "Scheduler.h"
+#include "AsclinAscDemo.h"
 
 /******************************************************************************/
 /*-----------------------------------Macros-----------------------------------*/
@@ -85,5 +86,6 @@ void Scheduler_appTaskFlag_100ms(void){
 };
 void Scheduler_appTaskFlag_1s(void)
 {
-    Led_toggle();
+    // Led_toggle();
+    // AsclinAscDemo_run();
 }

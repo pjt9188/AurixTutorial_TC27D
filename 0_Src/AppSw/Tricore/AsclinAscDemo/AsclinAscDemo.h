@@ -1,6 +1,6 @@
 /**
- * \file Cpu0_Main.h
- * \brief System initialization and main program implementation.
+ * \file AsclinAscDemo.h
+ * \brief Demo AsclinAscDemo
  *
  * \version iLLD_Demos_1_0_1_8_0
  * \copyright Copyright (c) 2014 Infineon Technologies AG. All rights reserved.
@@ -20,47 +20,71 @@
  * INFINEON SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL,
  * OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
  *
- * \defgroup IfxLld_Demo_AsclinAsc_SrcDoc Source code documentation
- * \ingroup IfxLld_Demo_AsclinAsc
+ * \defgroup IfxLld_Demo_AsclinAsc_SrcDoc_Main Demo Source
+ * \ingroup IfxLld_Demo_AsclinAsc_SrcDoc
+ * \defgroup IfxLld_Demo_AsclinAsc_SrcDoc_Main_Interrupt Interrupts
+ * \ingroup IfxLld_Demo_AsclinAsc_SrcDoc_Main
  */
 
-#ifndef CPU0_MAIN_H
-#define CPU0_MAIN_H
+#ifndef ASCLINASCDEMO_H
+#define ASCLINASCDEMO_H 1
 
 /******************************************************************************/
 /*----------------------------------Includes----------------------------------*/
 /******************************************************************************/
 
+#include <Ifx_Types.h>
 #include "Configuration.h"
-#include "Cpu/Std/Ifx_Types.h"
-#include "IfxScuWdt.h"
+#include "ConfigurationIsr.h"
+#include <Asclin/Asc/IfxAsclin_Asc.h>
+#include "Led.h"
 
 /******************************************************************************/
 /*-----------------------------------Macros-----------------------------------*/
 /******************************************************************************/
 
+#define ASC_TX_BUFFER_SIZE 64
+#define ASC_RX_BUFFER_SIZE 64
+
 /******************************************************************************/
-/*------------------------------Type Definitions------------------------------*/
+/*--------------------------------Enumerations--------------------------------*/
+/******************************************************************************/
+
+/******************************************************************************/
+/*-----------------------------Data Structures--------------------------------*/
 /******************************************************************************/
 
 typedef struct
 {
-    float32 sysFreq;                /**< \brief Actual SPB frequency */
-    float32 cpuFreq;                /**< \brief Actual CPU frequency */
-    float32 pllFreq;                /**< \brief Actual PLL frequency */
-    float32 stmFreq;                /**< \brief Actual STM frequency */
-} AppInfo;
+    uint8 tx[ASC_TX_BUFFER_SIZE + sizeof(Ifx_Fifo) + 8];
+    uint8 rx[ASC_RX_BUFFER_SIZE + sizeof(Ifx_Fifo) + 8];
+} AppAscBuffer;
 
-/** \brief Application information */
+/** \brief Asc information */
 typedef struct
 {
-    AppInfo info;                               /**< \brief Info object */
-} App_Cpu0;
+    AppAscBuffer ascBuffer;                     /**< \brief ASC interface buffer */
+    struct
+    {
+        IfxAsclin_Asc asc3;                     /**< \brief ASC interface */
+    }         drivers;
+
+    uint8     txData[5];
+    uint8     rxData[5];
+    Ifx_SizeT count;
+} App_AsclinAsc;
 
 /******************************************************************************/
 /*------------------------------Global variables------------------------------*/
 /******************************************************************************/
 
-IFX_EXTERN App_Cpu0 g_AppCpu0;
+IFX_EXTERN App_AsclinAsc g_AsclinAsc;
+
+/******************************************************************************/
+/*-------------------------Function Prototypes--------------------------------*/
+/******************************************************************************/
+
+IFX_EXTERN void AsclinAscDemo_init(void);
+IFX_EXTERN void AsclinAscDemo_run(void);
 
 #endif

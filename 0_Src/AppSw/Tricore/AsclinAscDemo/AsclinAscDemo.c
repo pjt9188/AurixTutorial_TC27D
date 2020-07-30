@@ -64,9 +64,9 @@ App_AsclinAsc g_AsclinAsc; /**< \brief Demo information */
 /** \name Interrupts for Transmit
  * \{ */
 
-IFX_INTERRUPT(asclin1TxISR, 0, ISR_PRIORITY_ASCLIN1_TX)
+IFX_INTERRUPT(asclin3TxISR, 0, ISR_PRIORITY_ASC_3_TX)
 {
-    IfxAsclin_Asc_isrTransmit(&g_AsclinAsc.drivers.asc1);
+    IfxAsclin_Asc_isrTransmit(&g_AsclinAsc.drivers.asc3);
 }
 
 /** \} */
@@ -74,9 +74,9 @@ IFX_INTERRUPT(asclin1TxISR, 0, ISR_PRIORITY_ASCLIN1_TX)
 /** \name Interrupts for Receive
  * \{ */
 
-IFX_INTERRUPT(asclin1RxISR, 0, ISR_PRIORITY_ASCLIN1_RX)
+IFX_INTERRUPT(asclin3RxISR, 0, ISR_PRIORITY_ASC_3_RX)
 {
-    IfxAsclin_Asc_isrReceive(&g_AsclinAsc.drivers.asc1);
+    IfxAsclin_Asc_isrReceive(&g_AsclinAsc.drivers.asc3);
 }
 
 /** \} */
@@ -84,9 +84,9 @@ IFX_INTERRUPT(asclin1RxISR, 0, ISR_PRIORITY_ASCLIN1_RX)
 /** \name Interrupts for Error
  * \{ */
 
-IFX_INTERRUPT(asclin1ErISR, 0, ISR_PRIORITY_ASCLIN1_ER)
+IFX_INTERRUPT(asclin3ErISR, 0, ISR_PRIORITY_ASC_3_ER)
 {
-    IfxAsclin_Asc_isrError(&g_AsclinAsc.drivers.asc1);
+    IfxAsclin_Asc_isrError(&g_AsclinAsc.drivers.asc3);
 }
 
 /** \} */
@@ -104,17 +104,17 @@ void AsclinAscDemo_init(void)
 
     /* create module config */
     IfxAsclin_Asc_Config ascConfig;
-    IfxAsclin_Asc_initModuleConfig(&ascConfig, &MODULE_ASCLIN1);
+    IfxAsclin_Asc_initModuleConfig(&ascConfig, &MODULE_ASCLIN3);
 
     /* set the desired baudrate */
     ascConfig.baudrate.prescaler    = 1;
-    ascConfig.baudrate.baudrate     = 1000000; /* FDR values will be calculated in initModule */
+    ascConfig.baudrate.baudrate     = 115200; /* FDR values will be calculated in initModule */
     ascConfig.baudrate.oversampling = IfxAsclin_OversamplingFactor_4;
 
     /* ISR priorities and interrupt target */
-    ascConfig.interrupt.txPriority    = ISR_PRIORITY_ASCLIN1_TX;
-    ascConfig.interrupt.rxPriority    = ISR_PRIORITY_ASCLIN1_RX;
-    ascConfig.interrupt.erPriority    = ISR_PRIORITY_ASCLIN1_ER;
+    ascConfig.interrupt.txPriority    = ISR_PRIORITY_ASC_3_TX;
+    ascConfig.interrupt.rxPriority    = ISR_PRIORITY_ASC_3_RX;
+    ascConfig.interrupt.erPriority    = ISR_PRIORITY_ASC_3_ER;
     ascConfig.interrupt.typeOfService = (IfxSrc_Tos)IfxCpu_getCoreIndex();
 
     /* FIFO configuration */
@@ -127,20 +127,20 @@ void AsclinAscDemo_init(void)
     /* pin configuration */
     const IfxAsclin_Asc_Pins pins = {
         NULL,                     IfxPort_InputMode_pullUp,        /* CTS pin not used */
-        &IfxAsclin1_RXB_P15_5_IN, IfxPort_InputMode_pullUp,        /* Rx pin */
+        &IfxAsclin3_RXD_P32_2_IN, IfxPort_InputMode_pullUp,        /* Rx pin */
         NULL,                     IfxPort_OutputMode_pushPull,     /* RTS pin not used */
-        &IfxAsclin1_TX_P15_4_OUT, IfxPort_OutputMode_pushPull,     /* Tx pin */
+        &IfxAsclin3_TX_P15_7_OUT, IfxPort_OutputMode_pushPull,     /* Tx pin */
         IfxPort_PadDriver_cmosAutomotiveSpeed1
     };
     ascConfig.pins = &pins;
 
     /* initialize module */
-    IfxAsclin_Asc_initModule(&g_AsclinAsc.drivers.asc1, &ascConfig);
+    IfxAsclin_Asc_initModule(&g_AsclinAsc.drivers.asc3, &ascConfig);
 
     /* enable interrupts again */
     IfxCpu_restoreInterrupts(interruptState);
 
-    printf("Asclin Asc is initialised\n");
+    printf("Asclin Asc is initialized\n");
 }
 
 
@@ -152,6 +152,9 @@ void AsclinAscDemo_run(void)
 {
     uint32 i, errors = 0;
 
+    printf("Asclin Background loop started\n");
+    Led_BlinkSeveralTimes(3);
+
     /* prepare data to transmit and receive */
     g_AsclinAsc.count = 5;
 
@@ -162,13 +165,13 @@ void AsclinAscDemo_run(void)
     }
 
     /* Transmit data */
-    IfxAsclin_Asc_write(&g_AsclinAsc.drivers.asc1, g_AsclinAsc.txData, &g_AsclinAsc.count, TIME_INFINITE);
+    IfxAsclin_Asc_write(&g_AsclinAsc.drivers.asc3, g_AsclinAsc.txData, &g_AsclinAsc.count, TIME_INFINITE);
 
     /* Receive data */
-    IfxAsclin_Asc_read(&g_AsclinAsc.drivers.asc1, g_AsclinAsc.rxData, &g_AsclinAsc.count, TIME_INFINITE);
+    IfxAsclin_Asc_read(&g_AsclinAsc.drivers.asc3, g_AsclinAsc.rxData, &g_AsclinAsc.count, TIME_INFINITE);
 
     /* check received data */
-    for (i = 0; i < 5; ++i)
+    for (i = 0; i < g_AsclinAsc.count; ++i)
     {
         if (g_AsclinAsc.rxData[i] != g_AsclinAsc.txData[i])
         {
