@@ -34,6 +34,7 @@ void Led_init(void);
 void Led_toggle(void);
 void Led_on(void);
 void Led_off(void);
+void Led_BlinkSeveralTimes(int numberOfBlinking);
 
 /******************************************************************************/
 /*------------------------Private Variables/Constants-------------------------*/
@@ -61,4 +62,15 @@ void Led_on(void){
 
 void Led_off(void){
     IfxPort_setPinLow(g_Led.outputPin.port, g_Led.outputPin.pinIndex);
+}
+
+void Led_BlinkSeveralTimes(int numberOfBlinking){
+    int i = 0;
+    for(i=0; i < numberOfBlinking; i++){
+        Led_on();
+        IfxStm_waitTicks(g_Stm.stmSfr, TimeConst_100ms * 2.5);
+        Led_off();
+        IfxStm_waitTicks(g_Stm.stmSfr, TimeConst_100ms * 2.5);
+    }
+    Led_on();
 }
