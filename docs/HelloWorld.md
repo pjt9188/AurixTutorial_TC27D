@@ -298,13 +298,13 @@ void AsclinAscDemo_run(void)
   }
   ```
 
-- Tera Term을 통한 Data 송신확인
+- Tera Term을 통한 Data 송신확인   
   ![데이터출력](Images/HelloWorld/HelloWorld_TeraTermResult.png)
 
-- Tera Term을 통한 Data 수신확인
-  ![UDE 디버그 결과](Images/HelloWorld/HelloWorld_rxData_Error.png)
-  수신의 경우 rxData가 중간에 다른 값이 받아지는 경우가 생기는데 명확한 이유를 모르겠다.
-  (추측하기로 UDE에서 실행했을 때 UDE가 asclin에 영향을 주는 것 같다고 염형이 말했었던걸로 보아, 그것과 관련된 문제가 아닐지 추측된다)
+- Tera Term을 통한 Data 수신확인   
+  ![UDE 디버그 결과](Images/HelloWorld/HelloWorld_rxData_Error.png)   
+  수신의 경우 rxData가 중간에 다른 값이 받아지는 경우가 생기는데 명확한 이유를 모르겠다.   
+  (추측하기로 UDE에서 실행했을 때 UDE가 asclin에 영향을 주는 것 같다고 염형이 말했었던걸로 보아, 그것과 관련된 문제가 아닐지 추측된다)   
 
-- Simulated I/O를 통한 메세지 확인
+- Simulated I/O를 통한 메세지 확인    
   ![UDE simio 결과](Images/HelloWorld/HelloWorld_simio_Error.png)
