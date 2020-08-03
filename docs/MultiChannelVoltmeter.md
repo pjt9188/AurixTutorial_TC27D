@@ -130,5 +130,81 @@ void VadcBackgroundScanDemo_init(void)
 
     // start scan
     IfxVadc_Adc_startBackgroundScan(&g_VadcBackgroundScan.vadc);
-    }
+}
 ```
+## 추가적인 설명
+### In AurixRacer; TestVadcBgScan
+- 각 보드에서 사용할 그룹과 채널은 다음과 같다
+  - ~TC237: Group1의 채널 0, 1, 2, 3~
+  - TC275: Group5의 채널 0, 1, 2, 3
+- 각 Board에는 이 source에 맞는 pin이 맵핑되어있다 → 메뉴얼 통해서 확인
+
+  - ~TC237~
+  ![TC237 PinMap](https://aurixtutorial.readthedocs.io/ko/latest/images/MultiChannelVoltmeter_Pin_237.png)   
+   
+  - TC275   
+  ![TC275 PinMap](Images/MuliChannelVoltmeter\TC275_ADC(SAR)_pinMapping.png)   
+
+  [출처] ShieldBuddy TC275 User Manual/44-page   
+  [참고] ADC(Analog to Digital)의 방식중에 SAR(Successive Approximation Register)방식으로 작동하기 때문에, pin mapping에도 ADC대신 SAR이라고 표기되어있다.
+
+Group 5의 채널 4 - DAC0
+Group 5의 채널 5 - DAC1
+Group 5의 채널 6 - CAN RX
+Group 5의 채널 7 - CAN TX
+보드에서 이 핀들의 위치는 아래와 같다.   
+![TC275 Connector Mapping](Images/TC275_ConnectorMapping.png)   
+
+- Channel configuration 초기화 때 이 설정값을 입력
+```c
+// in BasicVadcBgScan.c
+#if BOARD == APPLICATION_KIT_TC237
+static uint32 adcChannelNum[ADC_CHN_MAX] = {
+        3, 4, 8, 9  // AN15, AN16, AN20, AN21
+};
+#elif BOARD == SHIELD_BUDDY
+static uint32 adcChannelNum[ADC_CHN_MAX] = {
+        4, 5, 6, 7 // AN44, AN45, AN46, AN47
+};
+#endif
+
+
+for (chnIx = 0; chnIx < ADC_CHN_MAX; ++chnIx)
+{
+        IfxVadc_Adc_initChannelConfig(&adcChannelConfig, &g_VadcBackgroundScan.adcGroup);
+
+        adcChannelConfig.channelId         = (IfxVadc_ChannelId)(adcChannelNum[chnIx]);
+        adcChannelConfig.resultRegister    = (IfxVadc_ChannelResult)(adcChannelNum[chnIx]);
+        adcChannelConfig.backgroundChannel = TRUE;
+
+        // 생략
+}
+```
+- Default 분해능은 12bit이기 때문에 결과값은 0~4095의 수치로 나올 것이다.
+- 직관적인 사용을 위해 nomalization하여 저장한다(4095로 나누어 0~1의 값을 받는다).
+
+```c
+// in BasicVadcBgScan.c
+void BasicVadcBgScan_run(void)
+{
+    uint32                    chnIx;
+    // wait for valid result
+    volatile Ifx_VADC_RES conversionResult;
+
+        // check results
+        for (chnIx = 0; chnIx < ADC_CHN_MAX; ++chnIx)
+        {
+            do
+            {
+                conversionResult = IfxVadc_Adc_getResult(&g_VadcBackgroundScan.adcChannel[chnIx]);
+            } while (!conversionResult.B.VF);
+
+            IR_AdcResult[chnIx] = (float32) conversionResult.B.RESULT / 4095;
+
+        }
+}
+```
+## 마치며
+관련 설정을 하면서 무척 놀랐을 것입니다. '고작 두채널의 정보를 읽어들이는데 이렇게 많은 사항을 고려하고 길게 프로그래밍해야 하나?' 하고 말입니다. 시작하며 이야기 했던 것 처럼, VADC는 뛰어난 기능을 가진 ADC 입니다. 그 기능을 활용하기 위해서 앞서 강조한 바와 같이 섬세하게 설정해 준 것입니다. 일단 이렇게 섬세하게 설정해 주면 VADC는 우리를 배신(?)하지 않습니다. 빠른 속도로 값을 변환하여 언제든지 읽을 수 있게 만들어 줍니다.
+
+이제 여러 채널의 아날로그 전압을 읽어들일 수 있게 되었습니다. 약간 과장하면 Multi Channel Voltmeter를 가지게 되었다고 말할 수 있습니다. 이 전압값을 적절하게 스케일 하면 이 전압을 만들어 냈었던 센서의 측정값으로 변경할 수도 있습니다.

@@ -8,3 +8,4 @@
 - [Multiple Infinite Loops](docs/MultipleInfiniteLoops.md)
 - [Hello World](docs/HelloWorld.md)
 - [My Own Terminal](docs/MyOwnTerminal.md)
+- [Multi Channel Voltmeter](docs/MultiChannelVoltmeter.md)
