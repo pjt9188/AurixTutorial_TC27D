@@ -65,36 +65,54 @@ void VadcBackgroundScanDemo_init(void)
 {
     /* VADC Configuration */
 
-    /* create configuration */
-    IfxVadc_Adc_Config adcConfig;
+    /* create module configuration */
+    IfxVadc_Adc_Config          adcConfig;              // create module configuration
+    /* initialize module config */
     IfxVadc_Adc_initModuleConfig(&adcConfig, &MODULE_VADC);
-
     /* initialize module */
     IfxVadc_Adc_initModule(&g_VadcBackgroundScan.vadc, &adcConfig);
 
-    /* create group config */
-    IfxVadc_Adc_GroupConfig adcGroupConfig;
+    /* create gruop configuration */
+    IfxVadc_Adc_GroupConfig     adcGroupConfig;         // create Group Configurtaion
+    /* initialize group config */
     IfxVadc_Adc_initGroupConfig(&adcGroupConfig, &g_VadcBackgroundScan.vadc);
-
     /* with group 0 */
     adcGroupConfig.groupId = IfxVadc_GroupId_0;
     adcGroupConfig.master  = adcGroupConfig.groupId;
-
     /* enable background scan source */
     adcGroupConfig.arbiter.requestSlotBackgroundScanEnabled = TRUE;
-
     /* enable background auto scan */
     adcGroupConfig.backgroundScanRequest.autoBackgroundScanEnabled = TRUE;
-
     /* enable all gates in "always" mode (no edge detection) */
     adcGroupConfig.backgroundScanRequest.triggerConfig.gatingMode = IfxVadc_GatingMode_always;
-
-    /* initialize the group */
-    /*IfxVadc_Adc_Group adcGroup;*/    //declared globally
-    IfxVadc_Adc_initGroup(&g_VadcBackgroundScan.adcGroup, &adcGroupConfig);
-
     /* initialize the group */
     IfxVadc_Adc_initGroup(&g_VadcBackgroundScan.adcGroup, &adcGroupConfig);
+
+
+    uint32                      chnIx;                  // Background scan에 2채널을 추가    
+    /* create channel config */
+    IfxVadc_Adc_ChannelConfig   adcChannelConfig[2];  
+
+    /* initialize Channel Configuration */
+    for (chnIx = 0; chnIx < 2; ++chnIx)
+    {
+       IfxVadc_Adc_initChannelConfig(&adcChannelConfig[chnIx], &g_VadcBackgroundScan.adcGroup);
+
+       adcChannelConfig[chnIx].channelId         = (IfxVadc_ChannelId)(0 + chnIx);
+       adcChannelConfig[chnIx].resultRegister    = (IfxVadc_ChannelResult)(0 + chnIx); // use register #0 and 1 for results
+       adcChannelConfig[chnIx].backgroundChannel = TRUE;
+
+       // 채널 초기화
+       IfxVadc_Adc_initChannel(&g_VadcBackgroundScan.adcChannel[chnIx], &adcChannelConfig[chnIx]);
+
+       // background scan에 추가
+       unsigned channels = (1 << adcChannelConfig[chnIx].channelId);
+       unsigned mask     = channels;
+       IfxVadc_Adc_setBackgroundScan(&g_VadcBackgroundScan.vadc, &g_VadcBackgroundScan.adcGroup, channels, mask);
+    }
+
+    // start scan
+    IfxVadc_Adc_startBackgroundScan(&g_VadcBackgroundScan.vadc);
 }
 
 
@@ -104,59 +122,28 @@ void VadcBackgroundScanDemo_init(void)
  */
 void VadcBackgroundScanDemo_run(void)
 {
+    uint32              chnIx;
+    // uint32              actual;
+    // IfxVadc_GroupId     group;
+    // IfxVadc_ChannelId   channel;
+
+    volatile Ifx_VADC_RES conversionResult;
+
     printf("VadcBackgroundScanDemo_run() called\n");
 
-
-    printf("Add Background Scan of 2 channels\n");
-
+    for (chnIx = 0; chnIx < 2; ++chnIx)
     {
-        uint32                    chnIx;
-
-        /* create channel config */
-        IfxVadc_Adc_ChannelConfig adcChannelConfig[2];
-        IfxVadc_Adc_Channel       adcChannel[2];
-
-        for (chnIx = 0; chnIx < 2; ++chnIx)
+        volatile unsigned     group   = g_VadcBackgroundScan.adcChannel[chnIx].group->groupId;
+        volatile unsigned     channel = g_VadcBackgroundScan.adcChannel[chnIx].channel;
+        
+        /* wait for valid result */
+        do
         {
-            IfxVadc_Adc_initChannelConfig(&adcChannelConfig[chnIx], &g_VadcBackgroundScan.adcGroup);
+            conversionResult = IfxVadc_Adc_getResult(&g_VadcBackgroundScan.adcChannel[chnIx]);
+        } while (!conversionResult.B.VF);       // conversionResult.B.VF; 유효데이터임을 알려주는 valid flag
 
-            adcChannelConfig[chnIx].channelId         = (IfxVadc_ChannelId)(chnIx + 5);
-            adcChannelConfig[chnIx].resultRegister    = (IfxVadc_ChannelResult)(5 + chnIx); // use register #5 and 6 for results
-            adcChannelConfig[chnIx].backgroundChannel = TRUE;
+        uint32 actual = conversionResult.B.RESULT;
 
-            /* initialize the channel */
-            IfxVadc_Adc_initChannel(&adcChannel[chnIx], &adcChannelConfig[chnIx]);
-
-            /* add to background scan */
-            unsigned channels = (1 << adcChannelConfig[chnIx].channelId);
-            unsigned mask     = channels;
-            IfxVadc_Adc_setBackgroundScan(&g_VadcBackgroundScan.vadc, &g_VadcBackgroundScan.adcGroup, channels, mask);
-        }
-
-        /* start scan */
-        IfxVadc_Adc_startBackgroundScan(&g_VadcBackgroundScan.vadc);
-
-        /* check results */
-        for (chnIx = 0; chnIx < 2; ++chnIx)
-        {
-            unsigned     group   = adcChannel[chnIx].group->groupId;
-            unsigned     channel = adcChannel[chnIx].channel;
-
-            /* wait for valid result */
-            Ifx_VADC_RES conversionResult;
-
-            do
-            {
-                conversionResult = IfxVadc_Adc_getResult(&adcChannel[chnIx]);
-            } while (!conversionResult.B.VF);
-
-            /* print result, check with expected value */
-            {
-                uint32 actual = conversionResult.B.RESULT;
-
-                /* FIXME result verification pending ?? */
-                printf("Group %d Channel %d: %u, result : %u\n", group, channel, actual);
-            }
-        }
+        printf("Group %d Channel %d  : %lu\n", group, channel, actual);
     }
 }
