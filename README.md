@@ -9,3 +9,4 @@
 - [Hello World](docs/HelloWorld.md)
 - [My Own Terminal](docs/MyOwnTerminal.md)
 - [Multi Channel Voltmeter](docs/MultiChannelVoltmeter.md)
+- [My Own Cheap Oscilloscope](docs/MyOwnCheapOscilloscope.md)
