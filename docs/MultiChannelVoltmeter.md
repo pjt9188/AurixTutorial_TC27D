@@ -143,7 +143,7 @@ void VadcBackgroundScanDemo_init(void)
   ![TC237 PinMap](https://aurixtutorial.readthedocs.io/ko/latest/images/MultiChannelVoltmeter_Pin_237.png)   
    
   - TC275   
-  ![TC275 PinMap](Images/MuliChannelVoltmeter\TC275_ADC(SAR)_pinMapping.png)   
+  ![TC275 PinMap](Images/MuliChannelVoltmeter/TC275_ADC(SAR)_pinMapping.png)   
 
   [출처] ShieldBuddy TC275 User Manual/44-page   
   [참고] ADC(Analog to Digital)의 방식중에 SAR(Successive Approximation Register)방식으로 작동하기 때문에, pin mapping에도 ADC대신 SAR이라고 표기되어있다.
