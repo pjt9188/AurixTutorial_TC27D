@@ -26,8 +26,8 @@
 /******************************************************************************/
 
 #include <stdio.h>
-#include "VadcBackgroundScan.h"
 #include <Cpu/Std/IfxCpu.h>
+#include "VadcBackgroundScan.h"
 /******************************************************************************/
 /*-----------------------------------Macros-----------------------------------*/
 /******************************************************************************/
@@ -63,7 +63,7 @@ App_VadcBackgroundScan g_VadcBackgroundScan; /**< \brief Demo information */
  * VADC Group 4번 channel 7번(pin 32.3) 이용
  * channel 8번도 초기화 하지만, 사용안함
  */
-void VadcBackgroundScanDemo_init(void)
+void VadcBackgroundScan_init(void)
 {
     /* VADC Configuration */
 
@@ -102,7 +102,7 @@ void VadcBackgroundScanDemo_init(void)
 
        adcChannelConfig[chnIx].channelId         = (IfxVadc_ChannelId)(0 + chnIx);
        adcChannelConfig[chnIx].resultRegister    = (IfxVadc_ChannelResult)(0 + chnIx); // use register #0 and 1 for results
-       adcChannelConfig[chnIx].backgroundChannel = TRUE;
+       adcChannelConfig[chnIx].backgroundChannel = TRUE;    // channel을 background로 설정
 
        // 채널 초기화
        IfxVadc_Adc_initChannel(&g_VadcBackgroundScan.adcChannel[chnIx], &adcChannelConfig[chnIx]);
@@ -130,7 +130,7 @@ void VadcBackgroundScanDemo_init(void)
  *
  * This function is called from main, background loop
  */
-void VadcBackgroundScanDemo_run(void)
+void VadcBackgroundScan_run(void)
 {
     uint32              chnIx;
     // uint32              actual;

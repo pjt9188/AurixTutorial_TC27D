@@ -26,8 +26,8 @@
  * \ingroup IfxLld_Demo_VadcBackgroundScanDemo_SrcDoc_Main
  */
 
-#ifndef VADCBACKGROUNDSCANDEMO_H
-#define VADCBACKGROUNDSCANDEMO_H 1
+#ifndef VADCBACKGROUNDSCAN_H
+#define VADCBACKGROUNDSCAN_H 1
 
 /******************************************************************************/
 /*----------------------------------Includes----------------------------------*/
@@ -63,7 +63,7 @@ IFX_EXTERN App_VadcBackgroundScan g_VadcBackgroundScan;
 /******************************************************************************/
 /*-------------------------Function Prototypes--------------------------------*/
 /******************************************************************************/
-IFX_EXTERN void VadcBackgroundScanDemo_init(void);
-IFX_EXTERN void VadcBackgroundScanDemo_run(void);
+IFX_EXTERN void VadcBackgroundScan_init(void);
+IFX_EXTERN void VadcBackgroundScan_run(void);
 
 #endif
