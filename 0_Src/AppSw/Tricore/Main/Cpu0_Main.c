@@ -30,7 +30,7 @@
 #include "IfxScuWdt.h"
 #include "Stm.h"
 #include "Scheduler.h"
-// #include "AsclinAscDemo.h"
+#include "AsclinAscDemo.h"
 // #include "AsclinShellInterface.h"
 // #include "VadcBackgroundScan.h"
 #include "VadcAutoScan.h"
@@ -83,7 +83,8 @@ int core0_main(void)
     Led_BlinkSeveralTimes(2);
 
     /* AsclinAscDemo init */
-    // AsclinAscDemo_init();
+    AsclinAscDemo_init();
+    g_AsclinAsc.count = 2;
     // AsclinAscDemo_run();
 
     /* AsclinShellInterface init */
@@ -105,8 +106,14 @@ int core0_main(void)
         // IfxStm_waitTicks(g_Stm.stmSfr, TimeConst_100ms * 5);
 
         VadcAutoScan_run();
-        IfxStm_waitTicks(g_Stm.stmSfr, TimeConst_100ms * 5);
+        // IfxStm_waitTicks(g_Stm.stmSfr, TimeConst_100ms * 5);
 
+        /* Save Vadc scanned data into Asclin txData*/        
+        g_AsclinAsc.txData[0] = (uint8) ((g_VadcAutoScan.adcValue[7] & 0xFF00) >> 8);
+        g_AsclinAsc.txData[1] = (uint8) (g_VadcAutoScan.adcValue[7] & 0x00FF);
+
+        /* Asclin transmit(write) data*/
+        IfxAsclin_Asc_write(&g_AsclinAsc.drivers.asc3, g_AsclinAsc.txData, &g_AsclinAsc.count, TIME_INFINITE);
         REGRESSION_RUN_STOP_PASS;
     }
 

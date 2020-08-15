@@ -138,8 +138,8 @@ void VadcAutoScan_run(void)
     /* check results */
     for (chnIx = 7; chnIx < 8; ++chnIx)
     {
-        unsigned     group   = g_VadcAutoScan.adcChannel[chnIx].group->groupId;
-        unsigned     channel = g_VadcAutoScan.adcChannel[chnIx].channel;
+        // unsigned     group   = g_VadcAutoScan.adcChannel[chnIx].group->groupId;
+        // unsigned     channel = g_VadcAutoScan.adcChannel[chnIx].channel;
 
         /* wait for valid result */
         Ifx_VADC_RES conversionResult;
@@ -148,12 +148,11 @@ void VadcAutoScan_run(void)
         {
             conversionResult = IfxVadc_Adc_getResult(&g_VadcAutoScan.adcChannel[chnIx]);
         } while (!conversionResult.B.VF);
+        
+        /*  save the result in adcValue */
+        g_VadcAutoScan.adcValue[chnIx] = conversionResult.B.RESULT;
 
-        uint32 actual = conversionResult.B.RESULT;
         /* print result, check with expected value */
-        {
-            /* FIXME result verification pending ?? */
-            printf("Group %d Channel %d  : %lu\n", group, channel, actual);
-        }
+        // printf("Group %d Channel %d  : %hu\n", group, channel, g_VadcAutoScan.adcValue[chnIx]);
     }
 }
