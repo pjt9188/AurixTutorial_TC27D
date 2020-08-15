@@ -101,12 +101,12 @@ Converter 가 하나의 채널만 변환해야 할 경우에는 이 문제를 �
         - Single-shot mode : trigger가 발생하면 1번만 conversion을 요청하며, 다음 conversion을 요청하기 위해서는 또 1번의 trigger가 필요합니다.
         - Continuous mode : 1번 trigger가 발생하면, program된 conversion (sequence)이 반복적으로 요청됩니다.
     - Types of request sources
-        - Queued source: 입력 채널을 임의 순서로 변환하는 방식으로, 입력 채널 수 또는 순서는 자유롭게 변경 가능합니다(한 채널을 여러번 스캔하도록 설정도 가능합니다).
-        채널 설정에 따라 매우 짧은 변환도 가능합니다. 스캔 순서는 queue buffer로 설정합니다.
-        Request Source 0 → Group-Specific 8-stage Queued Source
-        - Channel scan source: 입력 채널과 동일한 순서로 순차적으로 변환을 수행하는 방식으로, Enable된 Channel 중 숫자가 높은 것부터 낮은 것 순으로 Scan합니다.
-        Request source 1 → a group-specific channel scan source.
-        Request source 2 → a global channel scan source (background source), The background source can request conversions of all channels of all groups.
+        - Queued source: 입력 채널을 임의 순서로 변환하는 방식으로, 입력 채널 수 또는 순서는 자유롭게 변경 가능합니다(한 채널을 여러번 스캔하도록 설정도 가능합니다).   
+        채널 설정에 따라 매우 짧은 변환도 가능합니다. 스캔 순서는 queue buffer로 설정합니다.   
+        Request Source 0 → Group-Specific 8-stage Queued Source   
+        - Channel scan source: 입력 채널과 동일한 순서로 순차적으로 변환을 수행하는 방식으로, Enable된 Channel 중 숫자가 높은 것부터 낮은 것 순으로 Scan합니다.   
+        Request source 1 → a group-specific channel scan source.   
+        Request source 2 → a global channel scan source (background source), The background source can request conversions of all channels of all groups.   
  - **Request source arbitration**
     - Arbiter operation
         - Arbiter는 다수의 request source로부터 동시에 ADC 요청이 왔을 때 중재자 역할을 합니다.
@@ -483,3 +483,29 @@ Converter 가 하나의 채널만 변환해야 할 경우에는 이 문제를 �
         return 0;
     }
     ```
+
+ ### SerialPlot 설정
+ -  위와 같이 전송 데이터를 설정하면 2byte의 데이터 2개가 전송되어 오게 됩니다.
+ - 각 데이터는 자료형이 uint16이고 각 자료는 Big Endian 으로 되어 있습니다. (즉 lower byte 가 큰 address에 할당되는 방식) 이 설정을 맞춰 주어야 올바른 데이터 해석이 가능합니다.
+ - 미리 저장되어 있는 설정치를 불러와 사용할 수도 있습니다.
+ - MyIlldModule_AK_TC23A/tool/SerialPlot.init
+ - MyIlldModule_SB_TC27D/tool/SerialPlot.init
+ ![SerialPlot Configuration](https://aurixtutorial.readthedocs.io/ko/latest/images/MyOwnCheapOscilloscope_WaveformSerialPlotDataFormat.png)
+
+ ### 파형측정 실험
+ - Function Generator를 사용하여 아래의 그림과 같이 2채널의 주기적 신호를 발생시키고 각각 Adc Channel 0 과 1 번에 연결하였습니다.
+     - Function Generator Channel 1 => Adc Channel 0 에 연결
+     - Function Generator Channel 2 => Adc Channel 1 에 연결
+ - SerialPlot를 사용하면 직렬 통신으로 전송되어 오는 데이터를 다음의 그림과 같이 출력하여 볼 수 있습니다.
+     - 필요하다면 Snapshot으로 파형을 저장할 수도 있고
+     - Data 자체를 파일로 Record 할 수도 있습니다.
+ ![Wave Detection_1](https://aurixtutorial.readthedocs.io/ko/latest/images/MyOwnCheapOscilloscope_WaveformGen.png)
+ ![Wave Detection_2](https://aurixtutorial.readthedocs.io/ko/latest/images/MyOwnCheapOscilloscope_WaveformSerialPlot.png)
+
+ ## 마치며
+  ADC의 성능을 이야기 하면서 숫자에 집착하여 채널이 많고, 변환속도가 빠르고, 분해능이 좋은 것만 중요하게 생각합니다. 그러나 하드웨어의 성능을 최대한 내기 위해서는 하드웨어를 잘 이해하고 용도에 맞게 설정하여 사용하는 소프트웨어적인 요소도 못지 않게 중요합니다.
+
+ 여러 채널의 데이터를 처리하기 위해서는 일반적으로 제어 알고리즘의 수행 주기보다는 훨씬 빈번한 AD 변환을 수행해야 합니다. 소프트웨어적으로 좋은 ADC는 CPU의 간섭, 즉 매 AD 변환마다 CPU가 관여해야 하는 부분을, 을 최소화 하고 ADC 가 알아서 스마트(?)하게 동작하여야 합니다. VADC를 이렇게 스마트하게 사용하는 방법을 이해하게 되면서 더욱더 발전된 마이크로 컨트롤러 프로그래머로 성장해 갈 수 있을 것입니다.
+
+ 이곳에서 다루지 않은 내용으로는 하드웨어 타이머를 사용하여 특정 타이밍에 수~수십 usec 주기마다 AD 변환을 수행하는 기법이 있습니다. 모터 구동에서 전류 샘플링과 같이 PWM신호와 동기화 되어 매 주기마다 연산을 수행해야 하는 경우에 사용됩니다. 아울러 고속으로 특정 채널의 값을 연속적으로 ADC가 변환해 놓고 일정 주기 마다 이 변환값들을 일괄적으로 처리하는 기법 등이 있습니다. 이런 모든 경우에 VADC는 효과적으로 사용할 수 있는 쓸만한(?), 그러나 조금은 까탈스러운, ADC 입니다.
+
