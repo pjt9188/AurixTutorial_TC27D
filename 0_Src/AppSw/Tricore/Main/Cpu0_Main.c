@@ -33,6 +33,8 @@
 // #include "AsclinAscDemo.h"
 // #include "AsclinShellInterface.h"
 #include "VadcBackgroundScanDemo.h"
+// #include "VadcAutoScanDemo.h"
+
 /******************************************************************************/
 /*------------------------Inline Function Prototypes--------------------------*/
 /******************************************************************************/
@@ -89,14 +91,20 @@ int core0_main(void)
 
     /* VadcBackgroundScanDemo init */
     VadcBackgroundScanDemo_init();
+
+    /* VadcAutoScanDemo init */
+    // VadcAutoScanDemo_init();
     
     /* background endless loop */
     while (TRUE)
     {
         // Scheduler_run();
         // AsclinShellInterface_run();
+        
         VadcBackgroundScanDemo_run();
         IfxStm_waitTicks(g_Stm.stmSfr, TimeConst_100ms * 5);
+
+        // VadcAutoScanDemo_run();
 
         REGRESSION_RUN_STOP_PASS;
     }

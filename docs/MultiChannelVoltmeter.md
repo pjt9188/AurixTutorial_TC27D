@@ -40,9 +40,9 @@ AURIX의 VADC는 위의 두가지 사항을 충실하게 지원해 주고 있습
 ## AURIX -related
 ### VADC ( Versatile Analog to Digital Converter )
 - VADC 구조
-  - ​2개의 converter group과 14개의 input channel
+  - 8개의 converter group과 group마다 각각 8개의 input channel
   - 각 그룹은 독립적으로 작동하는 ADC kernel
-  - 그룹별로 14채널의 전용 아날로그 input multiplexer를 보유
+  - 그룹별로 8채널의 전용 아날로그 input multiplexer를 보유
   - 어떤 채널을 어떤 타이밍(sample)에 어떤 우선순위(arbitration)을 갖고 스캔을 할지 제어 가능 (각 기능들의 의미와 설정은 다음장에서)
   - 이번 장에서는 background scan을 이용하여 데이터를 받아올 것이다.
 ![VADC Structure](https://aurixtutorial.readthedocs.io/ko/latest/images/MultiChannelVoltmeter_StructureOverview.png)
@@ -136,22 +136,37 @@ void VadcBackgroundScanDemo_init(void)
 ### In AurixRacer; TestVadcBgScan
 - 각 보드에서 사용할 그룹과 채널은 다음과 같다
   - ~TC237: Group1의 채널 0, 1, 2, 3~
-  - TC275: Group5의 채널 0, 1, 2, 3
-- 각 Board에는 이 source에 맞는 pin이 맵핑되어있다 → 메뉴얼 통해서 확인
-
+  - TC275: Group5의 채널 4, 5, 6, 7번
+- 각 Board에는 이 source에 맞는 pin이 맵핑되어있다 → 메뉴얼 통해서 확인   
   - ~TC237~
   ![TC237 PinMap](https://aurixtutorial.readthedocs.io/ko/latest/images/MultiChannelVoltmeter_Pin_237.png)   
-   
+  
+  - TC27X 메뉴얼    
+    ```
+    28.12.3 Analog Module Connections in the TC27x
+    ...
+    The exact number of analog input channels and the available connection to port pins   
+    depend on the employed product type (see also Section 28.12.1). A summary of   
+    channels enclosing all versions of the TC27x can be found below.   
+    ...
+    ```
+     -> TC27X의 버전마다 정확한 pin mapping이 다르므로 TC275 메뉴얼에서 pin mapping을 확인해야 한다.   
+    ![TC27X PinMap](Images/MuliChannelVoltmeter/TC27X_ADC(SAR)_pinMapping.png)    
+    Note: TC27X Mapping에서는 ADC(SAR)4.7이 P40.9에 연결되어 있다고 나와있는지만,   
+    밑의 TC275 Mapping과 비교해보면, TC275에서는 ADC(SAR)4.7은 P32.3과 연결되어있음을 알 수 있다.   
+    따라서 정확한 Pin Mapping은 TC275 Manual을 봐야할 것이다.
+    
+
   - TC275   
   ![TC275 PinMap](Images/MuliChannelVoltmeter/TC275_ADC(SAR)_pinMapping.png)   
 
   [출처] ShieldBuddy TC275 User Manual/44-page   
   [참고] ADC(Analog to Digital)의 방식중에 SAR(Successive Approximation Register)방식으로 작동하기 때문에, pin mapping에도 ADC대신 SAR이라고 표기되어있다.
 
-Group 5의 채널 4 - DAC0
-Group 5의 채널 5 - DAC1
-Group 5의 채널 6 - CAN RX
-Group 5의 채널 7 - CAN TX
+Group 5의 채널 4 - DAC0    
+Group 5의 채널 5 - DAC1    
+Group 5의 채널 6 - CAN RX    
+Group 5의 채널 7 - CAN TX    
 보드에서 이 핀들의 위치는 아래와 같다.   
 ![TC275 Connector Mapping](Images/TC275_ConnectorMapping.png)   
 

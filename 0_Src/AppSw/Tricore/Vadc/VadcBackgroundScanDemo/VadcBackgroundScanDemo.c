@@ -60,6 +60,8 @@ App_VadcBackgroundScan g_VadcBackgroundScan; /**< \brief Demo information */
 /** \brief Demo init API
  *
  * This function is called from main during initialization phase
+ * VADC Group 4번 channel 7번(pin 32.3) 이용
+ * channel 8번도 초기화 하지만, 사용안함
  */
 void VadcBackgroundScanDemo_init(void)
 {
@@ -77,7 +79,7 @@ void VadcBackgroundScanDemo_init(void)
     /* initialize group config */
     IfxVadc_Adc_initGroupConfig(&adcGroupConfig, &g_VadcBackgroundScan.vadc);
     /* with group 0 */
-    adcGroupConfig.groupId = IfxVadc_GroupId_0;
+    adcGroupConfig.groupId = IfxVadc_GroupId_4;         // Group 4번 사용
     adcGroupConfig.master  = adcGroupConfig.groupId;
     /* enable background scan source */
     adcGroupConfig.arbiter.requestSlotBackgroundScanEnabled = TRUE;
@@ -89,12 +91,12 @@ void VadcBackgroundScanDemo_init(void)
     IfxVadc_Adc_initGroup(&g_VadcBackgroundScan.adcGroup, &adcGroupConfig);
 
 
-    uint32                      chnIx;                  // Background scan에 2채널을 추가    
+    uint32                      chnIx;                  // Background scan에 1개 채널을 추가    
     /* create channel config */
-    IfxVadc_Adc_ChannelConfig   adcChannelConfig[2];  
+    IfxVadc_Adc_ChannelConfig   adcChannelConfig[8];  
 
     /* initialize Channel Configuration */
-    for (chnIx = 0; chnIx < 2; ++chnIx)
+    for (chnIx = 7; chnIx < 8; ++chnIx)                 // 채널 7, 8번 사용(8번은 안 씀)
     {
        IfxVadc_Adc_initChannelConfig(&adcChannelConfig[chnIx], &g_VadcBackgroundScan.adcGroup);
 
@@ -110,6 +112,15 @@ void VadcBackgroundScanDemo_init(void)
        unsigned mask     = channels;
        IfxVadc_Adc_setBackgroundScan(&g_VadcBackgroundScan.vadc, &g_VadcBackgroundScan.adcGroup, channels, mask);
     }
+
+    /* 
+    * Port 초기화 
+    * TC275 -> Analog pin 0(ADCL.1) -> pin 32.3 -> SAR(ADC) group 4 channel 7 -> General Purpose Input
+    */
+    g_VadcBackgroundScan.inputPin.port = &MODULE_P32;
+    g_VadcBackgroundScan.inputPin.pinIndex = 3;
+    IfxPort_setPinMode(g_VadcBackgroundScan.inputPin.port, g_VadcBackgroundScan.inputPin.pinIndex, IfxPort_Mode_inputNoPullDevice);
+
 
     // start scan
     IfxVadc_Adc_startBackgroundScan(&g_VadcBackgroundScan.vadc);
@@ -131,7 +142,7 @@ void VadcBackgroundScanDemo_run(void)
 
     printf("VadcBackgroundScanDemo_run() called\n");
 
-    for (chnIx = 0; chnIx < 2; ++chnIx)
+    for (chnIx = 7; chnIx < 8; ++chnIx)
     {
         volatile unsigned     group   = g_VadcBackgroundScan.adcChannel[chnIx].group->groupId;
         volatile unsigned     channel = g_VadcBackgroundScan.adcChannel[chnIx].channel;

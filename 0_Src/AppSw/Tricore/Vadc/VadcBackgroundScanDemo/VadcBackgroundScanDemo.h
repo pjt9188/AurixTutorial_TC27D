@@ -35,6 +35,7 @@
 
 #include <Vadc/Std/IfxVadc.h>
 #include <Vadc/Adc/IfxVadc_Adc.h>
+#include "IfxPort.h"
 /******************************************************************************/
 /*-----------------------------------Macros-----------------------------------*/
 /******************************************************************************/
@@ -50,7 +51,8 @@ typedef struct
 {
     IfxVadc_Adc vadc;   /* VADC handle*/
     IfxVadc_Adc_Group adcGroup;
-    IfxVadc_Adc_Channel adcChannel[2];
+    IfxVadc_Adc_Channel adcChannel[8];
+    IfxPort_Pin inputPin;
 } App_VadcBackgroundScan;
 
 /******************************************************************************/
