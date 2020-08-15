@@ -32,7 +32,7 @@
 #include "Scheduler.h"
 // #include "AsclinAscDemo.h"
 // #include "AsclinShellInterface.h"
-#include "VadcBackgroundScanDemo.h"
+#include "VadcBackgroundScan.h"
 // #include "VadcAutoScanDemo.h"
 
 /******************************************************************************/

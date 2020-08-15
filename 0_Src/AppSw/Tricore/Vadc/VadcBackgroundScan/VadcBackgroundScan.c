@@ -26,7 +26,7 @@
 /******************************************************************************/
 
 #include <stdio.h>
-#include "VadcBackgroundScanDemo.h"
+#include "VadcBackgroundScan.h"
 #include <Cpu/Std/IfxCpu.h>
 /******************************************************************************/
 /*-----------------------------------Macros-----------------------------------*/
@@ -91,12 +91,12 @@ void VadcBackgroundScanDemo_init(void)
     IfxVadc_Adc_initGroup(&g_VadcBackgroundScan.adcGroup, &adcGroupConfig);
 
 
-    uint32                      chnIx;                  // Background scan에 1개 채널을 추가    
+    uint32                      chnIx;
     /* create channel config */
-    IfxVadc_Adc_ChannelConfig   adcChannelConfig[8];  
+    IfxVadc_Adc_ChannelConfig   adcChannelConfig[8];    // Group4에 channel이 8개 존재하므로
 
     /* initialize Channel Configuration */
-    for (chnIx = 7; chnIx < 8; ++chnIx)                 // 채널 7, 8번 사용(8번은 안 씀)
+    for (chnIx = 7; chnIx < 8; ++chnIx)                 // 채널 7번만 사용
     {
        IfxVadc_Adc_initChannelConfig(&adcChannelConfig[chnIx], &g_VadcBackgroundScan.adcGroup);
 
@@ -114,13 +114,12 @@ void VadcBackgroundScanDemo_init(void)
     }
 
     /* 
-    * Port 초기화 
-    * TC275 -> Analog pin 0(ADCL.1) -> pin 32.3 -> SAR(ADC) group 4 channel 7 -> General Purpose Input
+    * Port 초기화(ADC4.7 -> P32.3 -> Analog pin 0(ADCL.1)) : General Purpose Input
+    * Default로 General Purpose Input으로 되어 있지만, 만약을 위해 init함수에 추가
     */
     g_VadcBackgroundScan.inputPin.port = &MODULE_P32;
     g_VadcBackgroundScan.inputPin.pinIndex = 3;
     IfxPort_setPinMode(g_VadcBackgroundScan.inputPin.port, g_VadcBackgroundScan.inputPin.pinIndex, IfxPort_Mode_inputNoPullDevice);
-
 
     // start scan
     IfxVadc_Adc_startBackgroundScan(&g_VadcBackgroundScan.vadc);
@@ -142,9 +141,9 @@ void VadcBackgroundScanDemo_run(void)
 
     printf("VadcBackgroundScanDemo_run() called\n");
 
-    for (chnIx = 7; chnIx < 8; ++chnIx)
+    for (chnIx = 7; chnIx < 8; ++chnIx)     // 채널 7번만 사용
     {
-        volatile unsigned     group   = g_VadcBackgroundScan.adcChannel[chnIx].group->groupId;
+        volatile unsigned     group   = g_VadcBackgroundScan.adcChannel[chnIx].group->groupId;      // Group 4번
         volatile unsigned     channel = g_VadcBackgroundScan.adcChannel[chnIx].channel;
         
         /* wait for valid result */
