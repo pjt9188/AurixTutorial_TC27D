@@ -90,10 +90,10 @@ int core0_main(void)
     // AsclinShellInterface_init();
 
     /* VadcBackgroundScan init */
-    VadcBackgroundScan_init();
+    // VadcBackgroundScan_init();
 
     /* VadcAutoScan init */
-    // VadcAutoScan_init();
+    VadcAutoScan_init();
     
     /* background endless loop */
     while (TRUE)
@@ -101,11 +101,11 @@ int core0_main(void)
         // Scheduler_run();
         // AsclinShellInterface_run();
         
-        VadcBackgroundScan_run();
-        IfxStm_waitTicks(g_Stm.stmSfr, TimeConst_100ms * 5);
-
-        // VadcAutoScan_run();
+        // VadcBackgroundScan_run();
         // IfxStm_waitTicks(g_Stm.stmSfr, TimeConst_100ms * 5);
+
+        VadcAutoScan_run();
+        IfxStm_waitTicks(g_Stm.stmSfr, TimeConst_100ms * 5);
 
         REGRESSION_RUN_STOP_PASS;
     }

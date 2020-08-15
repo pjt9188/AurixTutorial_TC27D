@@ -26,8 +26,8 @@
 /******************************************************************************/
 
 #include <stdio.h>
-#include "VadcAutoScanDemo.h"
 #include <Cpu/Std/IfxCpu.h>
+#include "VadcAutoScan.h"
 /******************************************************************************/
 /*-----------------------------------Macros-----------------------------------*/
 /******************************************************************************/
@@ -61,7 +61,7 @@ App_VadcAutoScan g_VadcAutoScan; /**< \brief Demo information */
  *
  * This function is called from main during initialization phase
  */
-void VadcAutoScanDemo_init(void)
+void VadcAutoScan_init(void)
 {
     /* VADC Configuration */
 
@@ -77,7 +77,7 @@ void VadcAutoScanDemo_init(void)
     IfxVadc_Adc_initGroupConfig(&adcGroupConfig, &g_VadcAutoScan.vadc);
 
     /* with group 0 */
-    adcGroupConfig.groupId = IfxVadc_GroupId_0;
+    adcGroupConfig.groupId = IfxVadc_GroupId_4;         // Group 4번 사용
     adcGroupConfig.master  = adcGroupConfig.groupId;
 
     /* enable scan source */
@@ -92,6 +92,36 @@ void VadcAutoScanDemo_init(void)
     /* initialize the group */
     /*IfxVadc_Adc_Group adcGroup;*/    //declared globally
     IfxVadc_Adc_initGroup(&g_VadcAutoScan.adcGroup, &adcGroupConfig);
+
+    uint32                    chnIx;
+    /* create channel config */
+    IfxVadc_Adc_ChannelConfig adcChannelConfig[8];      // Group4에 channel이 8개 존재하므로
+    for (chnIx = 7; chnIx < 8; ++chnIx)                 // 채널 7번만 사용
+    {
+        IfxVadc_Adc_initChannelConfig(&adcChannelConfig[chnIx], &g_VadcAutoScan.adcGroup);
+
+        adcChannelConfig[chnIx].channelId      = (IfxVadc_ChannelId)(chnIx);
+        adcChannelConfig[chnIx].resultRegister = (IfxVadc_ChannelResult)(chnIx);  /* use dedicated result register */
+
+        /* initialize the channel */
+        IfxVadc_Adc_initChannel(&g_VadcAutoScan.adcChannel[chnIx], &adcChannelConfig[chnIx]);
+
+        /* add to scan */
+        unsigned channels = (1 << adcChannelConfig[chnIx].channelId);
+        unsigned mask     = channels;
+        IfxVadc_Adc_setScan(&g_VadcAutoScan.adcGroup, channels, mask);
+    }
+
+    /* 
+    * Port 초기화(ADC4.7 -> P32.3 -> Analog pin 0(ADCL.1)) : General Purpose Input
+    * Default로 General Purpose Input으로 되어 있지만, 만약을 위해 init함수에 추가
+    */
+    g_VadcAutoScan.inputPin.port = &MODULE_P32;
+    g_VadcAutoScan.inputPin.pinIndex = 3;
+    IfxPort_setPinMode(g_VadcAutoScan.inputPin.port, g_VadcAutoScan.inputPin.pinIndex, IfxPort_Mode_inputNoPullDevice);
+
+    /* start autoscan */
+    IfxVadc_Adc_startScan(&g_VadcAutoScan.adcGroup);
 }
 
 
@@ -99,56 +129,31 @@ void VadcAutoScanDemo_init(void)
  *
  * This function is called from main, background loop
  */
-void VadcAutoScanDemo_run(void)
+void VadcAutoScan_run(void)
 {
-    printf("VadcAutoScanDemo_run() called\n");
+    printf("VadcAutoScan_run() called\n");
 
+    uint32                    chnIx;
 
+    /* check results */
+    for (chnIx = 7; chnIx < 8; ++chnIx)
     {
-        uint32                    chnIx;
-        /* create channel config */
-        IfxVadc_Adc_ChannelConfig adcChannelConfig[5];
-        IfxVadc_Adc_Channel       adcChannel[5];
+        unsigned     group   = g_VadcAutoScan.adcChannel[chnIx].group->groupId;
+        unsigned     channel = g_VadcAutoScan.adcChannel[chnIx].channel;
 
-        for (chnIx = 0; chnIx < 5; ++chnIx)
+        /* wait for valid result */
+        Ifx_VADC_RES conversionResult;
+
+        do
         {
-            IfxVadc_Adc_initChannelConfig(&adcChannelConfig[chnIx], &g_VadcAutoScan.adcGroup);
+            conversionResult = IfxVadc_Adc_getResult(&g_VadcAutoScan.adcChannel[chnIx]);
+        } while (!conversionResult.B.VF);
 
-            adcChannelConfig[chnIx].channelId      = (IfxVadc_ChannelId)(chnIx);
-            adcChannelConfig[chnIx].resultRegister = (IfxVadc_ChannelResult)(chnIx);  /* use dedicated result register */
-
-            /* initialize the channel */
-            IfxVadc_Adc_initChannel(&adcChannel[chnIx], &adcChannelConfig[chnIx]);
-
-            /* add to scan */
-            unsigned channels = (1 << adcChannelConfig[chnIx].channelId);
-            unsigned mask     = channels;
-            IfxVadc_Adc_setScan(&g_VadcAutoScan.adcGroup, channels, mask);
-        }
-
-        /* start autoscan */
-        IfxVadc_Adc_startScan(&g_VadcAutoScan.adcGroup);
-
-        /* check results */
-        for (chnIx = 0; chnIx < 5; ++chnIx)
+        uint32 actual = conversionResult.B.RESULT;
+        /* print result, check with expected value */
         {
-            unsigned     group   = adcChannel[chnIx].group->groupId;
-            unsigned     channel = adcChannel[chnIx].channel;
-
-            /* wait for valid result */
-            Ifx_VADC_RES conversionResult;
-
-            do
-            {
-                conversionResult = IfxVadc_Adc_getResult(&adcChannel[chnIx]);
-            } while (!conversionResult.B.VF);
-
-            uint32 actual = conversionResult.B.RESULT;
-            /* print result, check with expected value */
-            {
-                /* FIXME result verification pending ?? */
-                printf("Group %d Channel %d: %u, result : %u\n", group, channel, actual);
-            }
+            /* FIXME result verification pending ?? */
+            printf("Group %d Channel %d  : %lu\n", group, channel, actual);
         }
     }
 }

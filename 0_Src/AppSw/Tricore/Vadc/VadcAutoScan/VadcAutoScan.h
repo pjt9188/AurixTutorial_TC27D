@@ -26,8 +26,8 @@
  * \ingroup IfxLld_Demo_VadcAutoScanDemo_SrcDoc_Main
  */
 
-#ifndef VADCAUTOSCANDEMO_H
-#define VADCAUTOSCANDEMO_H 1
+#ifndef VADCAUTOSCAN_H
+#define VADCAUTOSCAN_H 1
 
 /******************************************************************************/
 /*----------------------------------Includes----------------------------------*/
@@ -50,6 +50,8 @@ typedef struct
 {
     IfxVadc_Adc vadc; /* VADC handle */
     IfxVadc_Adc_Group adcGroup;
+    IfxVadc_Adc_Channel adcChannel[8];
+    IfxPort_Pin inputPin;
 } App_VadcAutoScan;
 
 /******************************************************************************/
@@ -60,7 +62,7 @@ IFX_EXTERN App_VadcAutoScan g_VadcAutoScan;
 /******************************************************************************/
 /*-------------------------Function Prototypes--------------------------------*/
 /******************************************************************************/
-IFX_EXTERN void VadcAutoScanDemo_init(void);
-IFX_EXTERN void VadcAutoScanDemo_run(void);
+IFX_EXTERN void VadcAutoScan_init(void);
+IFX_EXTERN void VadcAutoScan_run(void);
 
 #endif
