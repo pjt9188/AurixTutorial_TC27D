@@ -239,10 +239,10 @@
  TOM will be now generating a PWM signal on the selected port pin while generating selected interrupt according to above configured period and duty cycle.
 
 #### Port Configuration
- - LED port : P10.2
+ - LED port : P10.2   
  ![P10.2 Configuration](Images/ChronousRuler/LedPortConfig.png)
 
- - 사용해야할 TOM : TOM0, Channel2
+ - 사용해야 할 TOM : TOM0 - Channel2   
  ![Gtm to Port](Images/ChronousRuler/GTM2Port.png)
 
  - Code에서 수정
