@@ -52,10 +52,11 @@
  * \{
  */
 
-#define ISR_PRIORITY_ASC_3_RX     4         /**< \brief Define the ASCLIN1 receive interrupt priority.  */
-#define ISR_PRIORITY_ASC_3_TX     8         /**< \brief Define the ASCLIN1 transmit interrupt priority.  */
-#define ISR_PRIORITY_ASC_3_EX     12         /**< \brief Define the ASCLIN1 error interrupt priority.  */
-#define ISR_PRIORITY_STM_STM0SR0  40        /**< \brief Define the System Timer Interrupt priority.  */
+#define ISR_PRIORITY_ASC_3_RX       4       /**< \brief Define the ASCLIN1 receive interrupt priority.  */
+#define ISR_PRIORITY_ASC_3_TX       8       /**< \brief Define the ASCLIN1 transmit interrupt priority.  */
+#define ISR_PRIORITY_ASC_3_EX       12      /**< \brief Define the ASCLIN1 error interrupt priority.  */
+#define ISR_PRIORITY_STM_STM0SR0    40      /**< \brief Define the System Timer Interrupt priority.  */
+#define ISR_PRIORITY_TOM0_CH2       20      /**< \brief Define the GTM TOM Interrupt priority.  */
 /** \} */
 
 /**

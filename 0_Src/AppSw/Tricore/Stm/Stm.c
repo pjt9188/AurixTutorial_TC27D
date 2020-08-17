@@ -103,7 +103,7 @@ void STM_Stm0Sr0Handler(void)
 
     if(g_Scheduler.counter % 1000 == 0){
         g_Scheduler.taskFlag_1s = TRUE;
-        Led_toggle();
+        // Led_toggle();
     }
 }
 
