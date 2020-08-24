@@ -55,8 +55,6 @@ void GtmTom_Pwm_init(void){
     IfxGtm_Cmu_setClkFrequency(g_GtmTom_Pwm.gtm, IfxGtm_Cmu_Clk_0, frequency / 100);
     // Select Clock source of the FXCLK
     GtmCmu_selectFxclkSource(g_GtmTom_Pwm.gtm, GtmCmu_Clk0);
-    // Enable FXCLK of which source is set as CMU_CLK0 (FXCLK is used by TOM and CLK0: used by ATOM)
-    IfxGtm_Cmu_enableClocks(g_GtmTom_Pwm.gtm, IFXGTM_CMU_CLKEN_FXCLK | IFXGTM_CMU_CLKEN_CLK0);
     
     IfxGtm_Tom_Pwm_initConfig(&g_GtmTom_Pwm.config, g_GtmTom_Pwm.gtm);
     g_GtmTom_Pwm.config.gtm                      = &MODULE_GTM;
@@ -71,6 +69,10 @@ void GtmTom_Pwm_init(void){
     // g_GtmTom_Pwm.config.interrupt.isrPriority    = ISR_PRIORITY_TOM0_CH2;
     g_GtmTom_Pwm.config.pin.outputPin            = &IfxGtm_TOM0_2_TOUT104_P10_2_OUT;
     IfxGtm_Tom_Pwm_init(&g_GtmTom_Pwm.driver, &g_GtmTom_Pwm.config);
+
+    // Enable FXCLK of which source is set as CMU_CLK0 (FXCLK is used by TOM and CLK0: used by ATOM)
+    // Clock이 Enable되고 난 후 Clock configuration이 안 먹히므로, 맨 끝에 넣자.
+    IfxGtm_Cmu_enableClocks(g_GtmTom_Pwm.gtm, IFXGTM_CMU_CLKEN_FXCLK | IFXGTM_CMU_CLKEN_CLK0);
 }
 
 void GtmTom_Pwm_changeDutyCycle(uint32 dutyCycle){
