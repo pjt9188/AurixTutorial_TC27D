@@ -12,3 +12,4 @@
 - [My Own Cheap Oscilloscope](docs/MyOwnCheapOscilloscope.md)
 - [Line Scan Camera(Optional)]() → Skip
 - [Chronous ruler](docs/ChronosRuler.md)
+- [Synchronized PWM](docs/SynchronizedPWM.md)
