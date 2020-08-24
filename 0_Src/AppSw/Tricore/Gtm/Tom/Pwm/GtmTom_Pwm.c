@@ -51,8 +51,10 @@ void GtmTom_Pwm_init(void){
     IfxGtm_enable(g_GtmTom_Pwm.gtm);
     // Set the global clock frequency to the max(CMU_GCLK_EN = 100Mhz)
     IfxGtm_Cmu_setGclkFrequency(g_GtmTom_Pwm.gtm, frequency);
-    // Set the CMU CLK0(CMU_CLK0 = 100Mhz / 100 = 1Mhz)
+    // Set the CMU CLK0(CMU_CLK0 = 100Mhz / 100 = 1Mhz, Period = 1us)
     IfxGtm_Cmu_setClkFrequency(g_GtmTom_Pwm.gtm, IfxGtm_Cmu_Clk_0, frequency / 100);
+    // Select Clock source of the FXCLK
+    GtmCmu_selectFxclkSource(g_GtmTom_Pwm.gtm, GtmCmu_Clk0);
     // Enable FXCLK of which source is set as CMU_CLK0 (FXCLK is used by TOM and CLK0: used by ATOM)
     IfxGtm_Cmu_enableClocks(g_GtmTom_Pwm.gtm, IFXGTM_CMU_CLKEN_FXCLK | IFXGTM_CMU_CLKEN_CLK0);
     
@@ -62,8 +64,8 @@ void GtmTom_Pwm_init(void){
     g_GtmTom_Pwm.config.tomChannel               = IfxGtm_Tom_Ch_2;
     g_GtmTom_Pwm.config.clock                    = IfxGtm_Tom_Ch_ClkSrc_cmuFxclk0;  // CMU_FXCLK0 = CMU_CLK0 / 1 =  1Mhz 
     g_GtmTom_Pwm.config.signalLevel              = Ifx_ActiveState_high;
-    g_GtmTom_Pwm.config.period                   = 20000;                           // period = 50ms = 20000 tics / 1Mhz
-    g_GtmTom_Pwm.config.dutyCycle                = 1500;                            // dutyCycle = 1500us
+    g_GtmTom_Pwm.config.period                   = 20000;                           // period = 20ms = 20,000 tics / 1Mhz -> frequency = 50hz
+    g_GtmTom_Pwm.config.dutyCycle                = 1500;                            // dutyCycle = 1,500us
     g_GtmTom_Pwm.config.synchronousUpdateEnabled = TRUE;
     // g_GtmTom_Pwm.config.interrupt.ccu0Enabled    = TRUE;
     // g_GtmTom_Pwm.config.interrupt.isrPriority    = ISR_PRIORITY_TOM0_CH2;

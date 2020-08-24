@@ -1,16 +1,16 @@
 /**
- * \file GtmTom_Pwm.h
+ * \file GtmCmu.h
  * \brief 
  */
 
-#ifndef GTMTOM_PWM_H
-#define GTMTOM_PWM_H 1
+#ifndef GTMCMU_H
+#define GTMCMU_H 1
 
 /******************************************************************************/
 /*----------------------------------Includes----------------------------------*/
 /******************************************************************************/
-#include "IfxGtm_Tom_Pwm.h"
-#include "GtmCmu.h"
+
+#include "Gtm/Std/IfxGtm_Cmu.h"
 
 /******************************************************************************/
 /*-----------------------------------Macros-----------------------------------*/
@@ -19,46 +19,39 @@
 /******************************************************************************/
 /*--------------------------------Enumerations--------------------------------*/
 /******************************************************************************/
+typedef enum
+{
+    GtmCmu_Gclk_En = 0,
+    GtmCmu_Clk0,
+    GtmCmu_Clk1,
+    GtmCmu_Clk2,
+    GtmCmu_Clk3,
+    GtmCmu_Clk4,
+    GtmCmu_Clk5,
+    GtmCmu_Clk6,
+    GtmCmu_Clk7,
+} GtmCmu_Fxclk_Source;
 
 /******************************************************************************/
 /*-----------------------------Data Structures--------------------------------*/
 /******************************************************************************/
-typedef struct{
-    Ifx_GTM*                gtm;
-    IfxGtm_Tom_Pwm_Config   config;
-    IfxGtm_Tom_Pwm_Driver   driver;
-}App_GtmTomPwm;
 
 /******************************************************************************/
 /*------------------------------Global variables------------------------------*/
 /******************************************************************************/
-IFX_EXTERN App_GtmTomPwm g_GtmTom_Pwm;
 
 /******************************************************************************/
 /*-------------------------Global Function Prototypes-------------------------*/
 /******************************************************************************/
-IFX_EXTERN void GtmTom_Pwm_init(void);
-IFX_EXTERN void GtmTom_Pwm_changeDutyCycle(uint32 dutyCycle);
-IFX_EXTERN void GtmTom_Pwm_run(void);
+
+IFX_EXTERN void GtmCmu_selectFxclkSource(Ifx_GTM *gtm, GtmCmu_Fxclk_Source src);
 
 /******************************************************************************/
 /*-------------------------Inline Function Prototypes-------------------------*/
 /******************************************************************************/
-IFX_INLINE void GtmTom_Pwm_start(void);
-IFX_INLINE void GtmTom_Pwm_stop(void);
 
 /******************************************************************************/
 /*---------------------Inline Function Implementations------------------------*/
 /******************************************************************************/
 
-IFX_INLINE void GtmTom_Pwm_start(void)
-{
-    IfxGtm_Tom_Pwm_start(&g_GtmTom_Pwm.driver, TRUE);
-}
-
-IFX_INLINE void GtmTom_Pwm_stop(void)
-{
-    IfxGtm_Tom_Pwm_stop(&g_GtmTom_Pwm.driver, TRUE);
-}
-
-#endif /* GTMTOM_PWM_H */
+#endif /* GTMCMU_H */
