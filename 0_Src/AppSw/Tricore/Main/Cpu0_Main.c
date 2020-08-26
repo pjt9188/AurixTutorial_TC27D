@@ -34,8 +34,8 @@
 // #include "AsclinShellInterface.h"
 // #include "VadcBackgroundScan.h"
 // #include "VadcAutoScan.h"
-#include "GtmTom_Pwm.h"
-// # include "GtmTom_PwmHl.h"
+// #include "GtmTom_Pwm.h"
+# include "GtmTom_PwmHl.h"
 
 /******************************************************************************/
 /*------------------------Inline Function Prototypes--------------------------*/
@@ -99,7 +99,10 @@ int core0_main(void)
     // VadcAutoScan_init();
 
     /* GtmTom Pwm init */
-    GtmTom_Pwm_init();
+    // GtmTom_Pwm_init();
+
+    /* GtmTom PwmHl init */
+    GtmTom_PwmHl_init();
     
     /* background endless loop */
     while (TRUE)
@@ -118,7 +121,8 @@ int core0_main(void)
         // /* Asclin transmit(write) data*/
         // IfxAsclin_Asc_write(&g_AsclinAsc.drivers.asc3, g_AsclinAsc.txData, &g_AsclinAsc.count, TIME_INFINITE);
 
-        GtmTom_Pwm_run();
+        // GtmTom_Pwm_run();
+        GtmTom_PwmHl_run();
         REGRESSION_RUN_STOP_PASS;
     }
 

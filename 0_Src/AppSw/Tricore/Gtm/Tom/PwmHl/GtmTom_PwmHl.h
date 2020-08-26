@@ -37,6 +37,7 @@
 #include "Configuration.h"
 #include "SysSe/Bsp/Bsp.h"
 
+#include "GtmCmu.h"
 #include "Gtm/Tom/PwmHl/IfxGtm_Tom_PwmHl.h"
 
 /******************************************************************************/
@@ -49,7 +50,8 @@
 
 typedef enum
 {
-    GtmTomPwmHl_State_init = 0,
+    GtmTomPwmHl_State_uninit = 0,
+    GtmTomPwmHl_State_init,
     GtmTomPwmHl_State_off,
     GtmTomPwmHl_State_duty0,
     GtmTomPwmHl_State_duty50,
@@ -71,6 +73,7 @@ typedef struct
         float32           gtmCmuClk0Freq; /**< \brief CMU CLK 0 frequency*/
         GtmTomPwmHl_State state;
         Ifx_TickTime      stateDeadline;
+        Ifx_TimerValue    timerValue;
     }info;
     struct
     {
@@ -81,6 +84,7 @@ typedef struct
     {
         uint32 slotTimer;
     }isrCounter;
+    Ifx_TimerValue tOn[2];
 }App_GtmTomPwmHl;
 
 /******************************************************************************/
@@ -93,7 +97,7 @@ IFX_EXTERN App_GtmTomPwmHl g_GtmTomPwmHl;
 /*-------------------------Function Prototypes--------------------------------*/
 /******************************************************************************/
 
-IFX_EXTERN void GtmTomPwmHlDemo_init(void);
-IFX_EXTERN void GtmTomPwmHlDemo_run(void);
+IFX_EXTERN void GtmTom_PwmHl_init(void);
+IFX_EXTERN void GtmTom_PwmHl_run(void);
 
 #endif
