@@ -93,31 +93,47 @@ void GtmTom_PwmHl_initTimer(void)
     // Create Timer Output Module(TOM) config for H-bridge
     IfxGtm_Tom_PwmHl_Config pwmHlConfig;
 
+    // Set TOM config for timer
     IfxGtm_Tom_Timer_initConfig(&timerConfig, &MODULE_GTM);
-    timerConfig.base.frequency                  = 1;                                    // frequency = 10Khz, Period = 100us = 10000tics * 10ns/1tic (max tics = 65535 = 2^16 -1)
+    /* 
+    * Set Frequency of PwmHl
+    * CMP0 = Gclk_Frequency / frequency 의 방식으로 Period tic을 구하므로,
+    * CMP0의 한계인 65535를 넘지 않도록 Gclk의 주파수를 조정해 주어야한다. 
+    */
+    timerConfig.base.frequency                  = 1;                                         
+
     timerConfig.base.isrPriority                = ISR_PRIORITY_TIMER;
     // timerConfig.base.isrPriority                = ISR_PRIORITY(INTERRUPT_TIMER);
     timerConfig.base.isrProvider                = ISR_PROVIDER_TIMER;
     // timerConfig.base.isrProvider                = ISR_PROVIDER(INTERRUPT_TIMER);
-    timerConfig.base.minResolution              = (1.0 / timerConfig.base.frequency) / 1000; /*
-                                                                                              * minResolution >= 1 / frequency 인지 init함수에서 검사
-                                                                                              * 특별히 설정하는 것은 없음. init함수에서 확인만 해줌
-                                                                                              */
 
-    timerConfig.base.trigger.enabled            = FALSE;                                     /* 여기서 trigger는 internal trigger가 아니라
-                                                                                              * Timer 채널(Ch0)이 만들어내는 PWM인데 
-                                                                                              * 왜 굳이 FALSE시켰다가 TRUE하는지 모르겠음..
-                                                                                              * clock = 100Mhz
-                                                                                              */
-    timerConfig.clock                           = IfxGtm_Tom_Ch_ClkSrc_cmuFxclk0;           // TOM의 Clock Source 선택   
+    /* 
+    * Set Frequency of PwmHl
+    * minResolution >= 1 / frequency 인지 init함수에서 검사
+    * 특별히 설정하는 것은 없음. init함수에서 확인만 해줌
+    */
+    timerConfig.base.minResolution              = (1.0 / timerConfig.base.frequency) / 1000; 
+    
+    /*
+    * 여기서 trigger는 internal trigger가 아니라 Timer 채널(Ch0)이 만들어내는 PWM인데 
+    * 왜 굳이 FALSE시켰다가 TRUE하는지 모르겠음..
+    */
+    timerConfig.base.trigger.enabled            = FALSE;          
 
+    /* Select channel clock source as Fxclk0 */                           
+    timerConfig.clock                           = IfxGtm_Tom_Ch_ClkSrc_cmuFxclk0;
     timerConfig.tom                             = IfxGtm_Tom_0;
     timerConfig.timerChannel                    = IfxGtm_Tom_Ch_0;
-    timerConfig.triggerOut                      = &IfxGtm_TOM0_0_TOUT77_P15_6_OUT;          // Set p15.6 as TOM output
-
+    /* Set p15.6 as Timer trigger output */
+    timerConfig.triggerOut                      = &IfxGtm_TOM0_0_TOUT77_P15_6_OUT;
+    /* Activate timer trigger */
     timerConfig.base.trigger.outputEnabled      = TRUE;
     timerConfig.base.trigger.enabled            = TRUE;
-    timerConfig.base.trigger.triggerPoint       = 5000;                                      // Set trigger point(PWM Output of CH0), (CM1) = 500tics = 500 * 10ns
+    /*
+    * Set trigger point(PWM Output of CH0)
+    * TOM0_CH0_CM1 = 5000tics
+    */
+    timerConfig.base.trigger.triggerPoint       = 5000;                                      
     timerConfig.base.trigger.risingEdgeAtPeriod = TRUE;
 
     IfxGtm_Tom_Timer_init(&g_GtmTomPwmHl.drivers.timer, &timerConfig);
@@ -170,20 +186,24 @@ void GtmTom_PwmHl_init(void)
     IfxGtm_enable(gtm);
 
     /* Set the global clock frequencies */
-    printf("Gclk init start\n");
-    // IfxGtm_Cmu_setGclkFrequency(gtm, g_GtmTomPwmHl.info.gtmFreq / 10000);
+    // IfxGtm_Cmu_setGclkFrequency(gtm, g_GtmTomPwmHl.info.gtmFreq / 10000);        // 큰 값으로 나눌 때, Gclk Den와 Num 계산에 시간이 너무 오래걸려 직접 넣음
     (&MODULE_GTM)->CMU.GCLK_NUM.B.GCLK_NUM = 10000;
     (&MODULE_GTM)->CMU.GCLK_DEN.B.GCLK_DEN = 1;
     g_GtmTomPwmHl.info.gtmGclkFreq = IfxGtm_Cmu_getGclkFrequency(gtm);
-    printf("Gclk init complete\n");
 
-    /* Set the CMU CLK0(CMU_CLK0 = 100Mhz, Period = 10ns) */
+    /* Set the CMU CLK0 */
     IfxGtm_Cmu_setClkFrequency(gtm, IfxGtm_Cmu_Clk_0, g_GtmTomPwmHl.info.gtmGclkFreq);
     g_GtmTomPwmHl.info.gtmCmuClk0Freq = IfxGtm_Cmu_getClkFrequency(gtm, IfxGtm_Cmu_Clk_0, TRUE);
     g_GtmTomPwmHl.info.state          = GtmTomPwmHl_State_init;
+    /* deadline이후 Pwm 수정이 가능함*/
     g_GtmTomPwmHl.info.stateDeadline  = now();
     
-    /* Select Clock source of the FXCLK -> CMU_CLK0 */
+    /*
+    * Select Clock source of the FXCLK -> CMU_CLK0
+    * 원래 FxCLK의 clock source로 CMU_CLK0로 하고 쓰려 했으나,
+    * PwmHl의 duty나 Period의 tick을 계산하는 ILLD 함수들이 FxCLK의 clock source를 찾지 않고
+    * Gclk의 주파수를 가져와 사용하기 때문에, Gclk의 주파수를 수정하여 Fxclk의 clock source로 사용하도록 한다.
+    */
     // GtmCmu_selectFxclkSource(&MODULE_GTM, GtmCmu_Clk0);
 
     /** - Initialise the GTM part */
@@ -213,6 +233,7 @@ void GtmTom_PwmHl_run(void)
     IfxGtm_Tom_Timer *timer = &g_GtmTomPwmHl.drivers.timer;
     Ifx_TimerValue   *tOn   = g_GtmTomPwmHl.tOn;
 
+    /* Deadline이 넘어간 이후부터 state 수정이 가능하도록 짜여져있음*/
     if (isDeadLine(g_GtmTomPwmHl.info.stateDeadline))
     {
         g_GtmTomPwmHl.info.stateDeadline = addTTime(g_GtmTomPwmHl.info.stateDeadline, TimeConst_1s * 5);
@@ -284,6 +305,7 @@ void GtmTom_PwmHl_setState(GtmTomPwmHl_State state)
 
     g_GtmTomPwmHl.info.state = state;
 
+    /* Deadline이 넘어간 이후부터 state 수정이 가능하도록 짜여져있음*/
     if (isDeadLine(g_GtmTomPwmHl.info.stateDeadline))
     {
         g_GtmTomPwmHl.info.stateDeadline = addTTime(g_GtmTomPwmHl.info.stateDeadline, TimeConst_1s);
