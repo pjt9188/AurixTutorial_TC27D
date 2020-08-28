@@ -52,7 +52,7 @@ typedef struct
     IfxVadc_Adc_Group adcGroup;
     IfxVadc_Adc_Channel adcChannel[8];
     uint16 adcValue[8];
-    IfxPort_Pin inputPin;
+    IfxPort_Pin inputPin[8];
 } App_VadcAutoScan;
 
 /******************************************************************************/

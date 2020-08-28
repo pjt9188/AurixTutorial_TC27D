@@ -50,9 +50,8 @@
 
 typedef enum
 {
-    GtmTomPwmHl_State_uninit = 0,
+    GtmTomPwmHl_State_off = 0,
     GtmTomPwmHl_State_init,
-    GtmTomPwmHl_State_off,
     GtmTomPwmHl_State_duty0,
     GtmTomPwmHl_State_duty50,
     GtmTomPwmHl_State_duty100,
@@ -99,5 +98,6 @@ IFX_EXTERN App_GtmTomPwmHl g_GtmTomPwmHl;
 
 IFX_EXTERN void GtmTom_PwmHl_init(void);
 IFX_EXTERN void GtmTom_PwmHl_run(void);
+IFX_EXTERN void GtmTom_PwmHl_setState(GtmTomPwmHl_State state);
 
 #endif

@@ -94,7 +94,7 @@ void GtmTom_PwmHl_initTimer(void)
     IfxGtm_Tom_PwmHl_Config pwmHlConfig;
 
     IfxGtm_Tom_Timer_initConfig(&timerConfig, &MODULE_GTM);
-    timerConfig.base.frequency                  = 10000;                                    // frequency = 10Khz, Period = 100us = 10000tics * 10ns/1tic (max tics = 65535 = 2^16 -1)
+    timerConfig.base.frequency                  = 1;                                    // frequency = 10Khz, Period = 100us = 10000tics * 10ns/1tic (max tics = 65535 = 2^16 -1)
     timerConfig.base.isrPriority                = ISR_PRIORITY_TIMER;
     // timerConfig.base.isrPriority                = ISR_PRIORITY(INTERRUPT_TIMER);
     timerConfig.base.isrProvider                = ISR_PROVIDER_TIMER;
@@ -117,7 +117,7 @@ void GtmTom_PwmHl_initTimer(void)
 
     timerConfig.base.trigger.outputEnabled      = TRUE;
     timerConfig.base.trigger.enabled            = TRUE;
-    timerConfig.base.trigger.triggerPoint       = 500;                                      // Set trigger point(PWM Output of CH0), (CM1) = 500tics = 500 * 10ns
+    timerConfig.base.trigger.triggerPoint       = 5000;                                      // Set trigger point(PWM Output of CH0), (CM1) = 500tics = 500 * 10ns
     timerConfig.base.trigger.risingEdgeAtPeriod = TRUE;
 
     IfxGtm_Tom_Timer_init(&g_GtmTomPwmHl.drivers.timer, &timerConfig);
@@ -130,11 +130,16 @@ void GtmTom_PwmHl_initTimer(void)
     coutx[0] = &IfxGtm_TOM0_4_TOUT22_P33_0_OUT;
     ccx[1]   = &IfxGtm_TOM0_2_TOUT107_P10_5_OUT;
     coutx[1] = &IfxGtm_TOM0_5_TOUT23_P33_1_OUT;
+    
+    IfxGtm_PinMap_setTomTout(ccx[0], IfxPort_OutputMode_pushPull, IfxPort_PadDriver_cmosAutomotiveSpeed1);
+    IfxGtm_PinMap_setTomTout(coutx[0], IfxPort_OutputMode_pushPull, IfxPort_PadDriver_cmosAutomotiveSpeed1);
+    IfxGtm_PinMap_setTomTout(ccx[1], IfxPort_OutputMode_pushPull, IfxPort_PadDriver_cmosAutomotiveSpeed1);
+    IfxGtm_PinMap_setTomTout(coutx[1], IfxPort_OutputMode_pushPull, IfxPort_PadDriver_cmosAutomotiveSpeed1);
 
     pwmHlConfig.timer                 = &g_GtmTomPwmHl.drivers.timer;
     pwmHlConfig.tom                   = timerConfig.tom;
-    pwmHlConfig.base.deadtime         = 2e-6;
-    pwmHlConfig.base.minPulse         = 1e-6;
+    pwmHlConfig.base.deadtime         = 10e-4;
+    pwmHlConfig.base.minPulse         = 1e-4;
     pwmHlConfig.base.channelCount     = 2;
     pwmHlConfig.base.emergencyEnabled = FALSE;
     pwmHlConfig.base.outputMode       = IfxPort_OutputMode_pushPull;
@@ -165,8 +170,12 @@ void GtmTom_PwmHl_init(void)
     IfxGtm_enable(gtm);
 
     /* Set the global clock frequencies */
-    IfxGtm_Cmu_setGclkFrequency(gtm, g_GtmTomPwmHl.info.gtmFreq);
+    printf("Gclk init start\n");
+    // IfxGtm_Cmu_setGclkFrequency(gtm, g_GtmTomPwmHl.info.gtmFreq / 10000);
+    (&MODULE_GTM)->CMU.GCLK_NUM.B.GCLK_NUM = 10000;
+    (&MODULE_GTM)->CMU.GCLK_DEN.B.GCLK_DEN = 1;
     g_GtmTomPwmHl.info.gtmGclkFreq = IfxGtm_Cmu_getGclkFrequency(gtm);
+    printf("Gclk init complete\n");
 
     /* Set the CMU CLK0(CMU_CLK0 = 100Mhz, Period = 10ns) */
     IfxGtm_Cmu_setClkFrequency(gtm, IfxGtm_Cmu_Clk_0, g_GtmTomPwmHl.info.gtmGclkFreq);
@@ -175,7 +184,7 @@ void GtmTom_PwmHl_init(void)
     g_GtmTomPwmHl.info.stateDeadline  = now();
     
     /* Select Clock source of the FXCLK -> CMU_CLK0 */
-    GtmCmu_selectFxclkSource(&MODULE_GTM, GtmCmu_Clk0);
+    // GtmCmu_selectFxclkSource(&MODULE_GTM, GtmCmu_Clk0);
 
     /** - Initialise the GTM part */
     GtmTom_PwmHl_initTimer();
@@ -189,6 +198,8 @@ void GtmTom_PwmHl_init(void)
     IfxCpu_restoreInterrupts(interruptState);
 
     IfxGtm_Cmu_enableClocks(gtm, IFXGTM_CMU_CLKEN_FXCLK | IFXGTM_CMU_CLKEN_CLK0);
+
+    GtmTom_PwmHl_setState(g_GtmTomPwmHl.info.state);
 }
 
 
@@ -198,16 +209,14 @@ void GtmTom_PwmHl_init(void)
  */
 void GtmTom_PwmHl_run(void)
 {
-    /* Set PWM duty */
     IfxGtm_Tom_PwmHl *pwmHl = &g_GtmTomPwmHl.drivers.pwm;
     IfxGtm_Tom_Timer *timer = &g_GtmTomPwmHl.drivers.timer;
     Ifx_TimerValue   *tOn   = g_GtmTomPwmHl.tOn;
 
     if (isDeadLine(g_GtmTomPwmHl.info.stateDeadline))
     {
-        g_GtmTomPwmHl.info.stateDeadline = addTTime(g_GtmTomPwmHl.info.stateDeadline, TimeConst_1s);
+        g_GtmTomPwmHl.info.stateDeadline = addTTime(g_GtmTomPwmHl.info.stateDeadline, TimeConst_1s * 5);
         g_GtmTomPwmHl.info.state++;
-
         if (g_GtmTomPwmHl.info.state >= GtmTomPwmHl_State_count)
         {
             g_GtmTomPwmHl.info.state = GtmTomPwmHl_State_off;
@@ -222,11 +231,18 @@ void GtmTom_PwmHl_run(void)
             IfxGtm_Tom_PwmHl_setOnTime(pwmHl, NULL_PTR);
             IfxGtm_Tom_Timer_applyUpdate(timer);
             break;
+        case GtmTomPwmHl_State_init:
+        /* Set PWM to off */
+            IfxGtm_Tom_PwmHl_setMode(pwmHl, Ifx_Pwm_Mode_off);
+            IfxGtm_Tom_Timer_disableUpdate(timer);
+            IfxGtm_Tom_PwmHl_setOnTime(pwmHl, NULL_PTR);
+            IfxGtm_Tom_Timer_applyUpdate(timer);
+            break;
         case GtmTomPwmHl_State_duty0:
             /* Set 0% duty cycle, center aligned */
-            IfxGtm_Tom_PwmHl_setMode(pwmHl, Ifx_Pwm_Mode_centerAligned);
             tOn[0] = 0;
             tOn[1] = 0;
+            IfxGtm_Tom_PwmHl_setMode(pwmHl, Ifx_Pwm_Mode_centerAligned);
             IfxGtm_Tom_Timer_disableUpdate(timer);
             IfxGtm_Tom_PwmHl_setOnTime(pwmHl, tOn);
             IfxGtm_Tom_Timer_applyUpdate(timer);
@@ -235,12 +251,14 @@ void GtmTom_PwmHl_run(void)
             /* Set 50% duty cycle, center aligned */
             tOn[0] = IfxGtm_Tom_Timer_getPeriod(timer) / 2;
             tOn[1] = IfxGtm_Tom_Timer_getPeriod(timer) / 2;
+            IfxGtm_Tom_PwmHl_setMode(pwmHl, Ifx_Pwm_Mode_centerAligned);
             IfxGtm_Tom_Timer_disableUpdate(timer);
             IfxGtm_Tom_PwmHl_setOnTime(pwmHl, tOn);
             IfxGtm_Tom_Timer_applyUpdate(timer);
             break;
         case GtmTomPwmHl_State_duty100:
             /* Set 100% duty cycle, center aligned */
+            IfxGtm_Tom_PwmHl_setMode(pwmHl, Ifx_Pwm_Mode_centerAligned);
             tOn[0] = IfxGtm_Tom_Timer_getPeriod(timer);
             tOn[1] = IfxGtm_Tom_Timer_getPeriod(timer);
             IfxGtm_Tom_Timer_disableUpdate(timer);
@@ -258,3 +276,72 @@ void GtmTom_PwmHl_run(void)
     }
 }
 
+void GtmTom_PwmHl_setState(GtmTomPwmHl_State state)
+{
+    IfxGtm_Tom_PwmHl *pwmHl = &g_GtmTomPwmHl.drivers.pwm;
+    IfxGtm_Tom_Timer *timer = &g_GtmTomPwmHl.drivers.timer;
+    Ifx_TimerValue   *tOn   = g_GtmTomPwmHl.tOn;
+
+    g_GtmTomPwmHl.info.state = state;
+
+    if (isDeadLine(g_GtmTomPwmHl.info.stateDeadline))
+    {
+        g_GtmTomPwmHl.info.stateDeadline = addTTime(g_GtmTomPwmHl.info.stateDeadline, TimeConst_1s);
+        if (g_GtmTomPwmHl.info.state >= GtmTomPwmHl_State_count)
+        {
+            g_GtmTomPwmHl.info.state = GtmTomPwmHl_State_off;
+        }
+
+        switch (g_GtmTomPwmHl.info.state)
+        {
+        case GtmTomPwmHl_State_off:
+            /* Set PWM to off */
+            IfxGtm_Tom_PwmHl_setMode(pwmHl, Ifx_Pwm_Mode_off);
+            IfxGtm_Tom_Timer_disableUpdate(timer);
+            IfxGtm_Tom_PwmHl_setOnTime(pwmHl, NULL_PTR);
+            IfxGtm_Tom_Timer_applyUpdate(timer);
+            break;
+        case GtmTomPwmHl_State_init:
+        /* Set PWM to off */
+            IfxGtm_Tom_PwmHl_setMode(pwmHl, Ifx_Pwm_Mode_off);
+            IfxGtm_Tom_Timer_disableUpdate(timer);
+            IfxGtm_Tom_PwmHl_setOnTime(pwmHl, NULL_PTR);
+            IfxGtm_Tom_Timer_applyUpdate(timer);
+            break;
+        case GtmTomPwmHl_State_duty0:
+            /* Set 0% duty cycle, center aligned */
+            tOn[0] = 0;
+            tOn[1] = 0;
+            IfxGtm_Tom_PwmHl_setMode(pwmHl, Ifx_Pwm_Mode_centerAligned);
+            IfxGtm_Tom_Timer_disableUpdate(timer);
+            IfxGtm_Tom_PwmHl_setOnTime(pwmHl, tOn);
+            IfxGtm_Tom_Timer_applyUpdate(timer);
+            break;
+        case GtmTomPwmHl_State_duty50:
+            /* Set 50% duty cycle, center aligned */
+            tOn[0] = IfxGtm_Tom_Timer_getPeriod(timer) / 2;
+            tOn[1] = IfxGtm_Tom_Timer_getPeriod(timer) / 2;
+            IfxGtm_Tom_PwmHl_setMode(pwmHl, Ifx_Pwm_Mode_centerAligned);
+            IfxGtm_Tom_Timer_disableUpdate(timer);
+            IfxGtm_Tom_PwmHl_setOnTime(pwmHl, tOn);
+            IfxGtm_Tom_Timer_applyUpdate(timer);
+            break;
+        case GtmTomPwmHl_State_duty100:
+            /* Set 100% duty cycle, center aligned */
+            IfxGtm_Tom_PwmHl_setMode(pwmHl, Ifx_Pwm_Mode_centerAligned);
+            tOn[0] = IfxGtm_Tom_Timer_getPeriod(timer);
+            tOn[1] = IfxGtm_Tom_Timer_getPeriod(timer);
+            IfxGtm_Tom_Timer_disableUpdate(timer);
+            IfxGtm_Tom_PwmHl_setOnTime(pwmHl, tOn);
+            IfxGtm_Tom_Timer_applyUpdate(timer);
+            break;
+        default:
+            /* Set PWM to off */
+            IfxGtm_Tom_PwmHl_setMode(pwmHl, Ifx_Pwm_Mode_off);
+            IfxGtm_Tom_Timer_disableUpdate(timer);
+            IfxGtm_Tom_PwmHl_setOnTime(pwmHl, NULL_PTR);
+            IfxGtm_Tom_Timer_applyUpdate(timer);
+            break;
+        }
+    }
+}

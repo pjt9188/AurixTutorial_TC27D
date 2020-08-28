@@ -69,6 +69,11 @@ void VadcAutoScan_init(void)
     IfxVadc_Adc_Config adcConfig;
     IfxVadc_Adc_initModuleConfig(&adcConfig, &MODULE_VADC);
 
+    /* change converting resolution */
+    /* Background Scan Source의 Resolution 선택 */
+    // adcConfig.globalInputClass[0].resolution = IfxVadc_ChannelResolution_8bit;
+    // adcConfig.globalInputClass[1].resolution = IfxVadc_ChannelResolution_8bit;
+
     /* initialize module */
     IfxVadc_Adc_initModule(&g_VadcAutoScan.vadc, &adcConfig);
 
@@ -89,6 +94,11 @@ void VadcAutoScan_init(void)
     /* enable all gates in "always" mode (no edge detection) */
     adcGroupConfig.scanRequest.triggerConfig.gatingMode = IfxVadc_GatingMode_always;
 
+    /* change converting resolution */
+    /* Group Scan Source의 Resolution 선택*/
+    adcGroupConfig.inputClass[0].resolution = IfxVadc_ChannelResolution_8bit;
+    adcGroupConfig.inputClass[1].resolution = IfxVadc_ChannelResolution_8bit;
+
     /* initialize the group */
     /*IfxVadc_Adc_Group adcGroup;*/    //declared globally
     IfxVadc_Adc_initGroup(&g_VadcAutoScan.adcGroup, &adcGroupConfig);
@@ -96,7 +106,7 @@ void VadcAutoScan_init(void)
     uint32                    chnIx;
     /* create channel config */
     IfxVadc_Adc_ChannelConfig adcChannelConfig[8];      // Group4에 channel이 8개 존재하므로
-    for (chnIx = 7; chnIx < 8; ++chnIx)                 // 채널 7번만 사용
+    for (chnIx = 4; chnIx < 8; ++chnIx)                 // 채널 4,5,6,7을 스캔으로 사용
     {
         IfxVadc_Adc_initChannelConfig(&adcChannelConfig[chnIx], &g_VadcAutoScan.adcGroup);
 
@@ -113,15 +123,33 @@ void VadcAutoScan_init(void)
     }
 
     /* 
-    * Port 초기화(ADC4.7 -> P32.3 -> Analog pin 0(ADCL.1)) : General Purpose Input
+    * Port 초기화
+    * SAR 4.4 -> P23.2 -> Analog pin 3(ADCL.4)) : General Purpose Input
+    * SAR 4.5 -> P32.1 -> Analog pin 2(ADCL.3)) : General Purpose Input
+    * SAR 4.6 -> P32.4 -> Analog pin 1(ADCL.2)) : General Purpose Input
+    * SAR 4.7 -> P32.3 -> Analog pin 0(ADCL.1)) : General Purpose Input
     * Default로 General Purpose Input으로 되어 있지만, 만약을 위해 init함수에 추가
     */
-    g_VadcAutoScan.inputPin.port = &MODULE_P32;
-    g_VadcAutoScan.inputPin.pinIndex = 3;
-    IfxPort_setPinMode(g_VadcAutoScan.inputPin.port, g_VadcAutoScan.inputPin.pinIndex, IfxPort_Mode_inputNoPullDevice);
+    g_VadcAutoScan.inputPin[4].port = &MODULE_P23;
+    g_VadcAutoScan.inputPin[4].pinIndex = 2;
+    IfxPort_setPinMode(g_VadcAutoScan.inputPin[4].port, g_VadcAutoScan.inputPin[4].pinIndex, IfxPort_Mode_inputNoPullDevice);
+    
+    g_VadcAutoScan.inputPin[5].port = &MODULE_P32;
+    g_VadcAutoScan.inputPin[5].pinIndex = 1;
+    IfxPort_setPinMode(g_VadcAutoScan.inputPin[5].port, g_VadcAutoScan.inputPin[5].pinIndex, IfxPort_Mode_inputNoPullDevice);
+
+    g_VadcAutoScan.inputPin[6].port = &MODULE_P32;
+    g_VadcAutoScan.inputPin[6].pinIndex = 4;
+    IfxPort_setPinMode(g_VadcAutoScan.inputPin[6].port, g_VadcAutoScan.inputPin[6].pinIndex, IfxPort_Mode_inputNoPullDevice);
+
+    g_VadcAutoScan.inputPin[7].port = &MODULE_P32;
+    g_VadcAutoScan.inputPin[7].pinIndex = 3;
+    IfxPort_setPinMode(g_VadcAutoScan.inputPin[7].port, g_VadcAutoScan.inputPin[7].pinIndex, IfxPort_Mode_inputNoPullDevice);
 
     /* start autoscan */
     IfxVadc_Adc_startScan(&g_VadcAutoScan.adcGroup);
+
+    printf("Vadc Autoscan Initialized\n");
 }
 
 
@@ -131,12 +159,12 @@ void VadcAutoScan_init(void)
  */
 void VadcAutoScan_run(void)
 {
-    printf("VadcAutoScan_run() called\n");
+    // printf("VadcAutoScan_run() called\n");
 
     uint32                    chnIx;
 
     /* check results */
-    for (chnIx = 7; chnIx < 8; ++chnIx)
+    for (chnIx = 4; chnIx < 8; ++chnIx)
     {
         // unsigned     group   = g_VadcAutoScan.adcChannel[chnIx].group->groupId;
         // unsigned     channel = g_VadcAutoScan.adcChannel[chnIx].channel;
@@ -149,10 +177,14 @@ void VadcAutoScan_run(void)
             conversionResult = IfxVadc_Adc_getResult(&g_VadcAutoScan.adcChannel[chnIx]);
         } while (!conversionResult.B.VF);
         
-        /*  save the result in adcValue */
-        g_VadcAutoScan.adcValue[chnIx] = conversionResult.B.RESULT;
+        /*  save the result in adcValue
+         * 8bit, 10bit resolution인 경우 앞에서 부터 결과가 채워지므로, 뒤에 각각 2개/4개의 0bit가 남는다
+         * 따라서 아래의 경우 8bit 분해능이므로 4개의 bit를 오른쪽으로 shift 해준다.
+        */
+
+        g_VadcAutoScan.adcValue[chnIx] = (conversionResult.B.RESULT >> 4);
 
         /* print result, check with expected value */
-        // printf("Group %d Channel %d  : %hu\n", group, channel, g_VadcAutoScan.adcValue[chnIx]);
+        // printf("Group %d Channel %lu  : %hu\n", g_VadcAutoScan.adcGroup.groupId, chnIx, g_VadcAutoScan.adcValue[chnIx]);
     }
 }

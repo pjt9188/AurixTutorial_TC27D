@@ -33,7 +33,7 @@
 #include "AsclinAscDemo.h"
 // #include "AsclinShellInterface.h"
 // #include "VadcBackgroundScan.h"
-// #include "VadcAutoScan.h"
+#include "VadcAutoScan.h"
 // #include "GtmTom_Pwm.h"
 # include "GtmTom_PwmHl.h"
 
@@ -84,9 +84,12 @@ int core0_main(void)
     Stm_init();
     Led_BlinkSeveralTimes(2);
 
+    /* Scheduler init*/
+    Scheduler_init();
+
     /* AsclinAscDemo init */
-    // AsclinAscDemo_init();
-    // g_AsclinAsc.count = 2;
+    AsclinAscDemo_init();
+    g_AsclinAsc.count = 4;
     // AsclinAscDemo_run();
 
     /* AsclinShellInterface init */
@@ -96,7 +99,7 @@ int core0_main(void)
     // VadcBackgroundScan_init();
 
     /* VadcAutoScan init */
-    // VadcAutoScan_init();
+    VadcAutoScan_init();
 
     /* GtmTom Pwm init */
     // GtmTom_Pwm_init();
@@ -107,22 +110,28 @@ int core0_main(void)
     /* background endless loop */
     while (TRUE)
     {
-        // Scheduler_run();
+        Scheduler_run();
         // AsclinShellInterface_run();
         
         // VadcBackgroundScan_run();
         // IfxStm_waitTicks(g_Stm.stmSfr, TimeConst_100ms * 5);
 
-        // /* Send Vadc Auto Scan data using ASCLIN*/
+        /* Send Vadc Auto Scan data using ASCLIN*/
         // VadcAutoScan_run();
-        // /* Save Vadc scanned data into Asclin txData */        
+        // IfxStm_waitTicks(g_Stm.stmSfr, TimeConst_1s);
+        /* Save Vadc scanned data into Asclin txData */        
         // g_AsclinAsc.txData[0] = (uint8) ((g_VadcAutoScan.adcValue[7] & 0xFF00) >> 8);
         // g_AsclinAsc.txData[1] = (uint8) (g_VadcAutoScan.adcValue[7] & 0x00FF);
-        // /* Asclin transmit(write) data*/
+        
+        // g_AsclinAsc.txData[0] = (uint8) (g_VadcAutoScan.adcValue[4] & 0x00FF);
+        // g_AsclinAsc.txData[1] = (uint8) (g_VadcAutoScan.adcValue[5] & 0x00FF);
+        // g_AsclinAsc.txData[2] = (uint8) (g_VadcAutoScan.adcValue[6] & 0x00FF);
+        // g_AsclinAsc.txData[3] = (uint8) (g_VadcAutoScan.adcValue[7] & 0x00FF);
+
+        /* Asclin transmit(write) data*/
         // IfxAsclin_Asc_write(&g_AsclinAsc.drivers.asc3, g_AsclinAsc.txData, &g_AsclinAsc.count, TIME_INFINITE);
 
         // GtmTom_Pwm_run();
-        GtmTom_PwmHl_run();
         REGRESSION_RUN_STOP_PASS;
     }
 

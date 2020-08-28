@@ -9,6 +9,8 @@
 
 #include "Scheduler.h"
 #include "AsclinAscDemo.h"
+#include "VadcAutoScan.h"
+#include "GtmTom_PwmHl.h"
 
 /******************************************************************************/
 /*-----------------------------------Macros-----------------------------------*/
@@ -76,6 +78,21 @@ void Scheduler_run(void){
 }
 
 void Scheduler_appTaskFlag_1ms(void){
+    GtmTom_PwmHl_run();
+    /* Send Vadc Auto Scan data using ASCLIN*/
+    VadcAutoScan_run();
+    // IfxStm_waitTicks(g_Stm.stmSfr, TimeConst_1s);
+    /* Save Vadc scanned data into Asclin txData */        
+    // g_AsclinAsc.txData[0] = (uint8) ((g_VadcAutoScan.adcValue[7] & 0xFF00) >> 8);
+    // g_AsclinAsc.txData[1] = (uint8) (g_VadcAutoScan.adcValue[7] & 0x00FF);
+
+    g_AsclinAsc.txData[0] = (uint8) (g_VadcAutoScan.adcValue[7] & 0x00FF);
+    g_AsclinAsc.txData[1] = (uint8) (g_VadcAutoScan.adcValue[6] & 0x00FF);
+    g_AsclinAsc.txData[2] = (uint8) (g_VadcAutoScan.adcValue[5] & 0x00FF);
+    g_AsclinAsc.txData[3] = (uint8) (g_VadcAutoScan.adcValue[4] & 0x00FF);
+
+    /* Asclin transmit(write) data*/
+    IfxAsclin_Asc_write(&g_AsclinAsc.drivers.asc3, g_AsclinAsc.txData, &g_AsclinAsc.count, TIME_INFINITE);
 
 };
 void Scheduler_appTaskFlag_10ms(void){
@@ -88,4 +105,5 @@ void Scheduler_appTaskFlag_1s(void)
 {
     // Led_toggle();
     // AsclinAscDemo_run();
+    GtmTom_PwmHl_run();
 }
