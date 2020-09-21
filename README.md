@@ -13,3 +13,4 @@
 - [Line Scan Camera(Optional)]() → Skip
 - [Chronous ruler](docs/ChronosRuler.md)
 - [Synchronized PWM](docs/SynchronizedPWM.md)
+- [Where Are you?](docs/WhereAreYou.md)
