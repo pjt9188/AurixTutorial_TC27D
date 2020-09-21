@@ -60,6 +60,8 @@
 
 #define ISR_PRIORITY_TOM0_CH2       20      /**< \brief Define the GTM TOM Interrupt priority.  */
 #define ISR_PRIORITY_TIMER          1       /**< \brief Define the 1ms timer interrupt priority.  */
+
+#define ISR_PRIORITY_INCRENC_ZERO   6       /**< \brief Define the Incremental encoder zero interrupt priority.  */
 /** \} */
 
 /**
@@ -71,19 +73,23 @@
 #define ISR_PROVIDER_STM_STM0SR0    IfxSrc_Tos_cpu0         /**< \brief Define the System Timer interrupt provider.  */
 
 #define ISR_PROVIDER_TIMER          IfxSrc_Tos_cpu0         /**< \brief Define the 1ms timer interrupt provider.  */
+
+#define ISR_PROVIDER_INCRENC_ZERO   IfxSrc_Tos_cpu0          /**< \brief Define the Incremental encoder zero interrupt provider.  */
 /** \} */
 
 /**
  * \name Interrupt configuration.
  * \{ */
 
-#define INTERRUPT_ASC_3_RX          ISR_ASSIGN(ISR_PRIORITY_ASC_3_RX, ISR_PROVIDER_ASC_3)         /**< \brief Install the ASCLIN1 receive interrupt handler.  */
-#define INTERRUPT_ASC_3_TX          ISR_ASSIGN(ISR_PRIORITY_ASC_3_TX, ISR_PROVIDER_ASC_3)         /**< \brief Install the ASCLIN1 transmit interrupt handler.  */
-#define INTERRUPT_ASC_3_EX          ISR_ASSIGN(ISR_PRIORITY_ASC_3_EX, ISR_PROVIDER_ASC_3)         /**< \brief Install the ASCLIN1 error interrupt handler.  */
+#define INTERRUPT_ASC_3_RX          ISR_ASSIGN(ISR_PRIORITY_ASC_3_RX, ISR_PROVIDER_ASC_3)               /**< \brief Install the ASCLIN1 receive interrupt handler.  */
+#define INTERRUPT_ASC_3_TX          ISR_ASSIGN(ISR_PRIORITY_ASC_3_TX, ISR_PROVIDER_ASC_3)               /**< \brief Install the ASCLIN1 transmit interrupt handler.  */
+#define INTERRUPT_ASC_3_EX          ISR_ASSIGN(ISR_PRIORITY_ASC_3_EX, ISR_PROVIDER_ASC_3)               /**< \brief Install the ASCLIN1 error interrupt handler.  */
 
-#define INTERRUPT_STM_STM0SR0       ISR_ASSIGN(ISR_PRIORITY_STM_INT0, ISR_PROVIDER_STM_INT0)    /**< \brief Define the System Timer interrupt priority.  */
+#define INTERRUPT_STM_STM0SR0       ISR_ASSIGN(ISR_PRIORITY_STM_INT0, ISR_PROVIDER_STM_INT0)            /**< \brief Define the System Timer interrupt priority.  */
 
-#define INTERRUPT_TIMER             ISR_ASSIGN(ISR_PRIORITY_TIMER, ISR_PROVIDER_TIMER)          /**< \brief Define the 1ms timer interrupt priority.  */
+#define INTERRUPT_TIMER             ISR_ASSIGN(ISR_PRIORITY_TIMER, ISR_PROVIDER_TIMER)                  /**< \brief Define the 1ms timer interrupt priority.  */
+
+#define INTERRUPT_INCRINC_ZERO      ISR_ASSIGN(ISR_PRIORITY_INCRENC_ZERO, ISR_PROVIDER_INCRENC_ZERO)    /**< \brief Define the  Incremental encoder zero interrupt priority.  */
 /** \} */
 
 /** \} */

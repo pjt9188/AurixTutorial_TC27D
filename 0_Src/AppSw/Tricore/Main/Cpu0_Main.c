@@ -29,13 +29,14 @@
 #include "SysSe/Bsp/Bsp.h"
 #include "IfxScuWdt.h"
 #include "Stm.h"
-#include "Scheduler.h"
-#include "AsclinAscDemo.h"
+// #include "Scheduler.h"
+// #include "AsclinAscDemo.h"
 // #include "AsclinShellInterface.h"
 // #include "VadcBackgroundScan.h"
-#include "VadcAutoScan.h"
+// #include "VadcAutoScan.h"
 // #include "GtmTom_Pwm.h"
-# include "GtmTom_PwmHl.h"
+// #include "GtmTom_PwmHl.h"
+#include "Gpt12Demo.h"
 
 /******************************************************************************/
 /*------------------------Inline Function Prototypes--------------------------*/
@@ -77,19 +78,18 @@ int core0_main(void)
     g_AppCpu0.info.sysFreq = IfxScuCcu_getSpbFrequency();
     g_AppCpu0.info.stmFreq = IfxStm_getFrequency(&MODULE_STM0);
 
-    /* Enable the global interrupts of this CPU */
-    IfxCpu_enableInterrupts();
+
 
     /* Stm init */
     Stm_init();
     Led_BlinkSeveralTimes(2);
 
     /* Scheduler init*/
-    Scheduler_init();
+    // Scheduler_init();
 
     /* AsclinAscDemo init */
-    AsclinAscDemo_init();
-    g_AsclinAsc.count = 4;
+    // AsclinAscDemo_init();
+    // g_AsclinAsc.count = 4;
     // AsclinAscDemo_run();
 
     /* AsclinShellInterface init */
@@ -99,18 +99,24 @@ int core0_main(void)
     // VadcBackgroundScan_init();
 
     /* VadcAutoScan init */
-    VadcAutoScan_init();
+    // VadcAutoScan_init();
 
     /* GtmTom Pwm init */
     // GtmTom_Pwm_init();
 
     /* GtmTom PwmHl init */
-    GtmTom_PwmHl_init();
-    
+    // GtmTom_PwmHl_init();
+
+    /* Demo init */
+    Gpt12Demo_init();
+
+    /* Enable the global interrupts of this CPU */
+    IfxCpu_enableInterrupts();
+
     /* background endless loop */
     while (TRUE)
     {
-        Scheduler_run();
+        // Scheduler_run();
         // AsclinShellInterface_run();
         
         // VadcBackgroundScan_run();
@@ -132,6 +138,9 @@ int core0_main(void)
         // IfxAsclin_Asc_write(&g_AsclinAsc.drivers.asc3, g_AsclinAsc.txData, &g_AsclinAsc.count, TIME_INFINITE);
 
         // GtmTom_Pwm_run();
+
+        Gpt12Demo_run();
+
         REGRESSION_RUN_STOP_PASS;
     }
 
